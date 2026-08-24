@@ -13,8 +13,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/shared/toast";
 import { expensesApi } from "@/lib/api/expenses";
 import { ApiError } from "@/lib/api/client";
+import { SUPPORTED_CURRENCIES } from "@/lib/currency/currency";
+import { useCurrency } from "@/lib/currency/currency-provider";
 import type { Expense } from "@/types/api";
-import { capitalize, formatMoney, formatShortDate, todayDateOnly } from "@/utils/format";
+import type { CurrencyCode } from "@/lib/currency/currency";
+import { capitalize, displayExpenseAmount, formatShortDate, todayDateOnly } from "@/utils/format";
 import { cn } from "@/utils/cn";
 
 const CATEGORY_SUGGESTIONS = [
@@ -29,13 +32,15 @@ const CATEGORY_SUGGESTIONS = [
 
 type ExpenseFormState = {
   amount: string;
+  currency: CurrencyCode;
   category: string;
   note: string;
   date: string;
 };
 
-const emptyForm = (): ExpenseFormState => ({
+const createEmptyForm = (currency: CurrencyCode): ExpenseFormState => ({
   amount: "",
+  currency,
   category: "",
   note: "",
   date: todayDateOnly(),
@@ -59,6 +64,7 @@ export function ExpenseWorkspace({
   onLoaded,
 }: ExpenseWorkspaceProps) {
   const { toast } = useToast();
+  const { currency: defaultCurrency } = useCurrency();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading",
@@ -69,7 +75,9 @@ export function ExpenseWorkspace({
   const [to, setTo] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Expense | null>(null);
-  const [form, setForm] = useState<ExpenseFormState>(emptyForm);
+  const [form, setForm] = useState<ExpenseFormState>(() =>
+    createEmptyForm(defaultCurrency),
+  );
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -115,7 +123,7 @@ export function ExpenseWorkspace({
 
   function openCreate() {
     setEditing(null);
-    setForm(emptyForm());
+    setForm(createEmptyForm(defaultCurrency));
     setFormError(null);
     setDialogOpen(true);
   }
@@ -124,6 +132,7 @@ export function ExpenseWorkspace({
     setEditing(expense);
     setForm({
       amount: String(expense.amount),
+      currency: expense.currency as CurrencyCode,
       category: expense.category,
       note: expense.note,
       date: expense.date,
@@ -155,6 +164,7 @@ export function ExpenseWorkspace({
       if (editing) {
         await expensesApi.update(editing.id, {
           amount,
+          currency: form.currency,
           category: form.category.trim(),
           note: form.note.trim(),
           date: form.date,
@@ -163,6 +173,7 @@ export function ExpenseWorkspace({
       } else {
         await expensesApi.create({
           amount,
+          currency: form.currency,
           category: form.category.trim(),
           note: form.note.trim(),
           date: form.date,
@@ -182,7 +193,7 @@ export function ExpenseWorkspace({
 
   async function onDelete(expense: Expense) {
     const confirmed = window.confirm(
-      `Delete this ${formatMoney(expense.amount)} expense?`,
+      `Delete this ${displayExpenseAmount(expense)} expense?`,
     );
     if (!confirmed) return;
 
@@ -292,9 +303,10 @@ export function ExpenseWorkspace({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-mono text-lg font-semibold tracking-tight text-expense">
-                      {formatMoney(expense.amount)}
+                      {displayExpenseAmount(expense)}
                     </p>
                     <Badge tone="primary">{capitalize(expense.category)}</Badge>
+                    <Badge>{expense.currency}</Badge>
                   </div>
                   <p className="mt-1 truncate text-sm text-foreground">
                     {expense.note || "No note"}
@@ -332,19 +344,48 @@ export function ExpenseWorkspace({
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         title={editing ? "Edit expense" : "Add expense"}
-        description="Amounts and categories stay scoped to your account."
+        description="Amount and currency are stored separately on each expense."
       >
         <form className="space-y-4" onSubmit={onSave}>
-          <Input
-            label="Amount"
-            name="amount"
-            inputMode="decimal"
-            required
-            value={form.amount}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, amount: event.target.value }))
-            }
-          />
+          <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
+            <Input
+              label="Amount"
+              name="amount"
+              inputMode="decimal"
+              required
+              value={form.amount}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, amount: event.target.value }))
+              }
+            />
+            <div className="space-y-2">
+              <label
+                htmlFor="expense-currency"
+                className="text-sm font-medium text-foreground"
+              >
+                Currency
+              </label>
+              <select
+                id="expense-currency"
+                name="currency"
+                required
+                value={form.currency}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    currency: event.target.value as CurrencyCode,
+                  }))
+                }
+                className="h-10 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {SUPPORTED_CURRENCIES.map((option) => (
+                  <option key={option.code} value={option.code}>
+                    {option.code}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           <Input
             label="Category"
             name="category"

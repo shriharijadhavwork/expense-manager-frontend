@@ -12,17 +12,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { expensesApi } from "@/lib/api/expenses";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-provider";
+import { useCurrency } from "@/lib/currency/currency-provider";
 import type { Expense } from "@/types/api";
 import {
   capitalize,
+  displayExpenseAmount,
+  formatCurrencyTotals,
   formatMoney,
   formatShortDate,
   startOfMonthDateOnly,
+  sumByCurrency,
   todayDateOnly,
 } from "@/utils/format";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { currency: preferredCurrency } = useCurrency();
   const router = useRouter();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -59,14 +64,15 @@ export default function DashboardPage() {
     const monthExpenses = expenses.filter(
       (expense) => expense.date >= monthStart && expense.date <= today,
     );
-    const totalAll = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-    const totalMonth = monthExpenses.reduce(
-      (sum, expense) => sum + expense.amount,
-      0,
+    const totalAllByCurrency = sumByCurrency(expenses);
+    const totalMonthByCurrency = sumByCurrency(monthExpenses);
+
+    const monthPreferred = monthExpenses.filter(
+      (expense) => expense.currency === preferredCurrency,
     );
 
     const byCategory = new Map<string, number>();
-    for (const expense of monthExpenses) {
+    for (const expense of monthPreferred) {
       byCategory.set(
         expense.category,
         (byCategory.get(expense.category) ?? 0) + expense.amount,
@@ -82,14 +88,14 @@ export default function DashboardPage() {
       .slice(0, 5);
 
     return {
-      totalAll,
-      totalMonth,
+      totalAllByCurrency,
+      totalMonthByCurrency,
       countMonth: monthExpenses.length,
       countAll: expenses.length,
       topCategories,
       recent,
     };
-  }, [expenses, monthStart, today]);
+  }, [expenses, monthStart, today, preferredCurrency]);
 
   return (
     <div className="space-y-8">
@@ -123,18 +129,41 @@ export default function DashboardPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <Card>
               <p className="text-sm text-muted-foreground">This month</p>
-              <p className="mt-3 font-mono text-2xl font-semibold tracking-tight text-expense">
-                {formatMoney(metrics.totalMonth)}
-              </p>
+              <div className="mt-3 space-y-1">
+                {formatCurrencyTotals(
+                  metrics.totalMonthByCurrency,
+                  preferredCurrency,
+                ).map((label) => (
+                  <p
+                    key={label}
+                    className="font-mono text-2xl font-semibold tracking-tight text-expense"
+                  >
+                    {label}
+                  </p>
+                ))}
+              </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 {`${metrics.countMonth} expense${metrics.countMonth === 1 ? "" : "s"}`}
+                {metrics.totalMonthByCurrency.size > 1
+                  ? " · totals shown per currency"
+                  : null}
               </p>
             </Card>
             <Card>
               <p className="text-sm text-muted-foreground">All time</p>
-              <p className="mt-3 font-mono text-2xl font-semibold tracking-tight">
-                {formatMoney(metrics.totalAll)}
-              </p>
+              <div className="mt-3 space-y-1">
+                {formatCurrencyTotals(
+                  metrics.totalAllByCurrency,
+                  preferredCurrency,
+                ).map((label) => (
+                  <p
+                    key={label}
+                    className="font-mono text-2xl font-semibold tracking-tight"
+                  >
+                    {label}
+                  </p>
+                ))}
+              </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 {metrics.countAll} recorded
               </p>
@@ -148,8 +177,11 @@ export default function DashboardPage() {
               </p>
               <p className="mt-2 text-xs text-muted-foreground">
                 {metrics.topCategories[0]
-                  ? formatMoney(metrics.topCategories[0][1])
-                  : "No spend this month"}
+                  ? formatMoney(
+                      metrics.topCategories[0][1],
+                      preferredCurrency,
+                    )
+                  : `No ${preferredCurrency} spend this month`}
               </p>
             </Card>
           </div>
@@ -196,7 +228,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                       <p className="shrink-0 font-mono text-sm font-semibold text-expense">
-                        {formatMoney(expense.amount)}
+                        {displayExpenseAmount(expense)}
                       </p>
                     </li>
                   ))}
@@ -222,7 +254,7 @@ export default function DashboardPage() {
                     >
                       <Badge tone="primary">{capitalize(name)}</Badge>
                       <p className="font-mono text-sm font-medium">
-                        {formatMoney(amount)}
+                        {formatMoney(amount, preferredCurrency)}
                       </p>
                     </div>
                   ))

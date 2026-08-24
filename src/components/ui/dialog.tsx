@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
+import { XIcon } from "@/components/ui/icons";
 import { cn } from "@/utils/cn";
 
 type DialogProps = {
@@ -39,12 +41,12 @@ export function Dialog({
     };
   }, [open, onClose]);
 
-  if (!open) {
+  if (!open || typeof document === "undefined") {
     return null;
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
       <button
         type="button"
         aria-label="Close dialog"
@@ -69,12 +71,19 @@ export function Dialog({
               <p className="mt-1 text-sm text-muted-foreground">{description}</p>
             ) : null}
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
-            ✕
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 shrink-0 px-0"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <XIcon />
           </Button>
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

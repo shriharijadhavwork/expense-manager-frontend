@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/api/client";
-import type { AuthResult, User } from "@/types/api";
+import type { AuthResult, User, UserPreferences } from "@/types/api";
 
 export type SignupInput = {
   name: string;
@@ -40,6 +40,15 @@ export const authApi = {
     return apiRequest<User>("/auth/me", {
       method: "GET",
       token,
+    });
+  },
+
+  updateMe(input: {
+    preferences: Partial<UserPreferences>;
+  }): Promise<UserPreferences> {
+    return apiRequest<UserPreferences>("/auth/me", {
+      method: "PATCH",
+      body: input,
     });
   },
 };
