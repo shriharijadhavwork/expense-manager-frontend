@@ -26,6 +26,8 @@ NEXT_PUBLIC_API_URL=http://localhost:5050/api/v1
 
 Ensure the backend is running and `FRONTEND_URL=http://localhost:3000` is set for CORS.
 
+**Realtime (Socket.IO):** connects to `NEXT_PUBLIC_WS_URL` or the API host (`http://localhost:5050`). See `docs/realtime-socketio-plan.md`.
+
 ## Scripts
 
 ```bash

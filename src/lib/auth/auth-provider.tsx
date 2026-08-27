@@ -11,6 +11,8 @@ import {
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/auth";
 import { ApiError, getStoredToken, setStoredToken } from "@/lib/api/client";
+import { appConfig } from "@/config/env";
+import { realtimeClient } from "@/lib/realtime/client";
 import type { User } from "@/types/api";
 
 type AuthContextValue = {
@@ -79,6 +81,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      realtimeClient.connect(token, appConfig.wsUrl);
+    } else {
+      realtimeClient.disconnect();
+    }
+  }, [token]);
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await authApi.login({ email, password });

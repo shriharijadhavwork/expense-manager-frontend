@@ -1,10 +1,12 @@
-import { cn } from "@/utils/cn";
+import * as React from "react";
+
+import { cn } from "@/lib/utils";
 
 type CardProps = React.HTMLAttributes<HTMLDivElement> & {
   padding?: "none" | "sm" | "md" | "lg";
 };
 
-export function Card({
+function Card({
   className,
   padding = "md",
   children,
@@ -12,6 +14,7 @@ export function Card({
 }: CardProps) {
   return (
     <div
+      data-slot="card"
       className={cn(
         "rounded-[var(--radius-lg)] border border-border bg-card text-card-foreground shadow-[var(--shadow-sm)]",
         padding === "sm" && "p-4",
@@ -26,3 +29,5 @@ export function Card({
     </div>
   );
 }
+
+export { Card };

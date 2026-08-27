@@ -194,6 +194,68 @@ export function formatTime(isoTimestamp: string, timeZone?: string): string {
   }).format(date);
 }
 
+/**
+ * Chat message timestamp — user's timezone, 12-hour clock with AM/PM (e.g. "9:23 PM").
+ */
+export function formatMessageTime(
+  isoTimestamp: string,
+  timeZone?: string,
+): string {
+  const date = new Date(isoTimestamp);
+  if (Number.isNaN(date.getTime())) {
+    return isoTimestamp;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: getTimeZone(timeZone),
+  }).format(date);
+}
+
+export function getMessageDayKey(
+  isoTimestamp: string,
+  timeZone?: string,
+): string {
+  const date = new Date(isoTimestamp);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return formatDateOnlyInTimezone(date, getTimeZone(timeZone));
+}
+
+/**
+ * Day divider label for chat — "Today", "Yesterday", or a short date.
+ */
+export function formatMessageDayDivider(
+  isoTimestamp: string,
+  timeZone?: string,
+): string {
+  const tz = getTimeZone(timeZone);
+  const messageDayKey = getMessageDayKey(isoTimestamp, tz);
+  if (!messageDayKey) {
+    return "";
+  }
+
+  const todayKey = todayDateOnly(tz);
+  if (messageDayKey === todayKey) {
+    return "Today";
+  }
+
+  const todayParts = getZonedDateParts(new Date(), tz);
+  const yesterdayRef = new Date(
+    Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day - 1, 12),
+  );
+  const yesterdayKey = formatDateOnlyInTimezone(yesterdayRef, tz);
+  if (messageDayKey === yesterdayKey) {
+    return "Yesterday";
+  }
+
+  return formatDateLabel(messageDayKey, tz);
+}
+
 export function todayDateOnly(timeZone?: string): string {
   return formatDateOnlyInTimezone(new Date(), getTimeZone(timeZone));
 }

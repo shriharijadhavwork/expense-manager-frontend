@@ -1,3 +1,12 @@
+"use client";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { USER_RELATION_OPTIONS, type UserRelation } from "@/constants/relation";
 import { cn } from "@/utils/cn";
 
@@ -23,25 +32,25 @@ export function RelationSelect({
       <label htmlFor={id} className="block text-sm font-medium text-foreground">
         {label}
       </label>
-      <select
-        id={id}
+      <Select
         value={value}
+        onValueChange={(nextValue) => onChange(nextValue as UserRelation)}
         disabled={disabled}
-        required
-        onChange={(event) => onChange(event.target.value as UserRelation)}
-        className={cn(
-          "h-10 w-full rounded-[var(--radius-md)] border border-input bg-card px-3 text-sm text-foreground",
-          "transition-colors hover:border-foreground/20",
-          "focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-        )}
       >
-        {USER_RELATION_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger
+          id={id}
+          className="h-10 w-full rounded-[var(--radius-md)] bg-card px-3"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent alignItemWithTrigger>
+          {USER_RELATION_OPTIONS.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

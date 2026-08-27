@@ -1,12 +1,33 @@
-import { cn } from "@/utils/cn";
+import * as React from "react";
+import { Input as InputPrimitive } from "@base-ui/react/input";
 
-type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+import { cn } from "@/lib/utils";
+
+function InputField({
+  className,
+  type,
+  ...props
+}: React.ComponentProps<"input">) {
+  return (
+    <InputPrimitive
+      type={type}
+      data-slot="input"
+      className={cn(
+        "h-10 w-full min-w-0 rounded-[var(--radius-md)] border border-input bg-card px-3 py-1 text-sm text-foreground transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground hover:border-foreground/20 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/30 dark:bg-input/30",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+type InputProps = React.ComponentProps<"input"> & {
   label?: string;
   error?: string;
   hint?: string;
 };
 
-export function Input({
+function Input({
   className,
   label,
   error,
@@ -26,17 +47,9 @@ export function Input({
           {label}
         </label>
       ) : null}
-      <input
+      <InputField
         id={inputId}
-        className={cn(
-          "h-10 w-full rounded-[var(--radius-md)] border border-input bg-card px-3 text-sm text-foreground",
-          "placeholder:text-muted-foreground",
-          "transition-colors hover:border-foreground/20",
-          "focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          error && "border-destructive focus-visible:ring-destructive/30",
-          className,
-        )}
+        className={cn(error && "border-destructive focus-visible:ring-destructive/30", className)}
         aria-invalid={Boolean(error)}
         aria-describedby={
           error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
@@ -55,3 +68,5 @@ export function Input({
     </div>
   );
 }
+
+export { Input, InputField };

@@ -1,10 +1,12 @@
-import { cn } from "@/utils/cn";
+import * as React from "react";
+
+import { cn } from "@/lib/utils";
 
 type BadgeProps = React.HTMLAttributes<HTMLSpanElement> & {
   tone?: "neutral" | "primary" | "success" | "warning" | "destructive";
 };
 
-export function Badge({
+function Badge({
   className,
   tone = "neutral",
   children,
@@ -12,6 +14,7 @@ export function Badge({
 }: BadgeProps) {
   return (
     <span
+      data-slot="badge"
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
         tone === "neutral" && "bg-muted text-muted-foreground",
@@ -27,3 +30,5 @@ export function Badge({
     </span>
   );
 }
+
+export { Badge };

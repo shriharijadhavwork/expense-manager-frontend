@@ -17,6 +17,7 @@ import {
   TrashIcon,
   UserIcon,
 } from "@/components/ui/icons";
+import { EntityAvatar } from "@/components/ui/entity-avatar";
 import {
   Popover,
   PopoverDivider,
@@ -41,19 +42,6 @@ type UserMenuProps = {
   onNavigate?: () => void;
   className?: string;
 };
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) {
-    return "?";
-  }
-
-  if (parts.length === 1) {
-    return parts[0]!.slice(0, 2).toUpperCase();
-  }
-
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
-}
 
 const themeOptions: Array<{ value: ThemePreference; label: string }> = [
   { value: "system", label: "System" },
@@ -195,9 +183,12 @@ export function UserMenu({ onNavigate, className }: UserMenuProps) {
         onClick={() => setOpen((value) => !value)}
         className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-sidebar-hover"
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-xs font-medium text-foreground/80">
-          {getInitials(user.name)}
-        </span>
+        <EntityAvatar
+          name={user.name}
+          email={user.email}
+          variant="neutral"
+          size="sm"
+        />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{user.name}</span>
           <span className="block truncate text-xs text-muted-foreground">

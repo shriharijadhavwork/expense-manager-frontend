@@ -10,7 +10,7 @@ import {
 import { GroupHeaderActions } from "@/components/groups/group-members-dialog";
 import type { ChatAttachment } from "@/components/chat/attachment-card";
 import { ChatComposer } from "@/components/chat/chat-composer";
-import { MessageBubble } from "@/components/chat/message-bubble";
+import { MessageBubble, ChatDayDivider } from "@/components/chat/message-bubble";
 import { ErrorState } from "@/components/shared/error-state";
 import { useToast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,8 @@ import { isAllowedAttachment } from "@/lib/files/attachment-policy";
 import { shouldPersistReadState } from "@/lib/chat/thread-read-state";
 import { notifyThreadsChanged } from "@/lib/chat/thread-events";
 import { notifyGroupsChanged } from "@/lib/groups/group-events";
+import { realtimeClient } from "@/lib/realtime/client";
+import { useTimezone } from "@/lib/timezone/timezone-provider";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { store } from "@/lib/store";
 import {
@@ -37,6 +39,8 @@ import {
 import type { DisplayMessage } from "@/components/chat/types";
 
 import type { Message, Thread, UploadedFile } from "@/types/api";
+import { formatMessageDayDivider, formatMessageTime, getMessageDayKey } from "@/utils/format";
+import { cn } from "@/utils/cn";
 import { useSearchParams } from "next/navigation";
 
 const MESSAGE_PAGE_SIZE = 30;
@@ -119,6 +123,53 @@ function createLocalThreadPlaceholder(threadId: string): Thread {
   };
 }
 
+function resolveMemberDisplayName(member?: {
+  name: string;
+  email: string;
+}): string {
+  if (!member) {
+    return "Member";
+  }
+
+  const name = member.name.trim();
+  if (name) {
+    return name;
+  }
+
+  return member.email || "Member";
+}
+
+function isSameMessageRun(
+  left: DisplayMessage | undefined,
+  right: DisplayMessage | undefined,
+  timeZone: string,
+): boolean {
+  if (!left || !right) {
+    return false;
+  }
+
+  if (left.role !== right.role) {
+    return false;
+  }
+
+  if (right.role === "system") {
+    return false;
+  }
+
+  if (
+    getMessageDayKey(left.createdAt, timeZone) !==
+    getMessageDayKey(right.createdAt, timeZone)
+  ) {
+    return false;
+  }
+
+  if (right.role === "user") {
+    return left.userId === right.userId;
+  }
+
+  return true;
+}
+
 type ChatWorkspaceProps = {
   threadId: string;
   onThreadIdChange?: (threadId: string) => void;
@@ -131,7 +182,8 @@ export function ChatWorkspace({
   skipInitialLoadRef,
 }: ChatWorkspaceProps) {
   const dispatch = useAppDispatch();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const { resolvedTimezone } = useTimezone();
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const groupIdParam = searchParams.get("groupId");
@@ -141,6 +193,9 @@ export function ChatWorkspace({
   const [deletingThread, setDeletingThread] = useState(false);
   const [restoringThread, setRestoringThread] = useState(false);
   const [isGroupOwner, setIsGroupOwner] = useState(false);
+  const [memberByUserId, setMemberByUserId] = useState<
+    Map<string, { name: string; email: string }>
+  >(() => new Map());
   const activeThreadId = isPersistedThreadId(threadId)
     ? threadId
     : persistedThreadId;
@@ -437,6 +492,7 @@ export function ChatWorkspace({
       if (!user || thread?.type !== "group" || !groupId) {
         if (!cancelled) {
           setIsGroupOwner(false);
+          setMemberByUserId(new Map());
         }
         return;
       }
@@ -451,10 +507,19 @@ export function ChatWorkspace({
                 member.userId === user.id && member.role === "owner",
             ),
           );
+          const nextMembers = new Map<string, { name: string; email: string }>();
+          for (const member of group.members) {
+            nextMembers.set(member.userId, {
+              name: member.name,
+              email: member.email,
+            });
+          }
+          setMemberByUserId(nextMembers);
         })
         .catch(() => {
           if (!cancelled) {
             setIsGroupOwner(false);
+            setMemberByUserId(new Map());
           }
         });
     });
@@ -490,6 +555,62 @@ export function ChatWorkspace({
 
     return () => window.cancelAnimationFrame(frame);
   }, [loadLatestMessages, loadThread, skipInitialLoadRef, threadId]);
+
+  useEffect(() => {
+    const subscribedThreadId = activeThreadId;
+
+    if (!token || !subscribedThreadId || !isPersistedThreadId(subscribedThreadId)) {
+      return;
+    }
+
+    const unsubscribe = realtimeClient.subscribe((event) => {
+      if (event.threadId !== apiThreadIdRef.current) {
+        return;
+      }
+
+      if (user && event.message.userId === user.id) {
+        return;
+      }
+
+      if (messagesRef.current.some((item) => item.id === event.message.id)) {
+        return;
+      }
+
+      void (async () => {
+        const [display] = await mapToDisplayMessages([event.message]);
+        if (!display) {
+          return;
+        }
+
+        shouldScrollToBottomRef.current = true;
+        setMessages((current) => {
+          if (current.some((item) => item.id === display.id)) {
+            return current;
+          }
+          return [...current, display];
+        });
+
+        const targetId = apiThreadIdRef.current;
+        if (targetId) {
+          persistThreadRead(targetId, display.createdAt);
+        }
+        notifyThreadsChanged();
+      })();
+    });
+
+    void realtimeClient.joinThread(subscribedThreadId);
+
+    return () => {
+      unsubscribe();
+      void realtimeClient.leaveThread(subscribedThreadId);
+    };
+  }, [
+    activeThreadId,
+    mapToDisplayMessages,
+    persistThreadRead,
+    token,
+    user,
+  ]);
 
   useEffect(() => {
     const cache = attachmentCacheRef.current;
@@ -847,8 +968,8 @@ export function ChatWorkspace({
 
         {messagesStatus === "loading" ? (
           <div className="mx-auto max-w-3xl space-y-4">
-            <Skeleton className="ml-auto h-14 w-2/3 max-w-sm rounded-[1.15rem]" />
-            <Skeleton className="mr-auto h-12 w-1/2 max-w-xs rounded-[1.15rem]" />
+            <Skeleton className="ml-auto h-12 w-2/3 max-w-sm rounded-[1.15rem]" />
+            <Skeleton className="mr-auto h-10 w-1/2 max-w-xs rounded-[1.15rem]" />
           </div>
         ) : null}
 
@@ -871,18 +992,79 @@ export function ChatWorkspace({
         ) : null}
 
         {messagesStatus === "success" && messages.length > 0 ? (
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 pb-4">
-            {messages.map((item) => (
-              <MessageBubble
-                key={item.clientKey}
-                message={item}
-                onRetry={
-                  item.sendStatus === "failed"
-                    ? () => onRetry(item.clientKey)
-                    : undefined
-                }
-              />
-            ))}
+          <div className="mx-auto flex w-full max-w-3xl flex-col pb-4">
+            {messages.map((item, index) => {
+              const previous = messages[index - 1];
+              const next = messages[index + 1];
+              const sameRunAsPrevious = isSameMessageRun(
+                previous,
+                item,
+                resolvedTimezone,
+              );
+              const sameRunAsNext = isSameMessageRun(
+                item,
+                next,
+                resolvedTimezone,
+              );
+              const dayKey = getMessageDayKey(item.createdAt, resolvedTimezone);
+              const previousDayKey = previous
+                ? getMessageDayKey(previous.createdAt, resolvedTimezone)
+                : null;
+              const showDayDivider = Boolean(
+                dayKey && dayKey !== previousDayKey,
+              );
+              const dayDividerLabel = showDayDivider
+                ? formatMessageDayDivider(item.createdAt, resolvedTimezone)
+                : "";
+              const isOwnMessage =
+                item.role === "user" &&
+                Boolean(user && item.userId === user.id);
+              const senderName = !item.userId
+                ? undefined
+                : isOwnMessage
+                  ? user?.name
+                  : resolveMemberDisplayName(memberByUserId.get(item.userId));
+              const memberProfile = item.userId
+                ? memberByUserId.get(item.userId)
+                : undefined;
+              const senderAvatarName = isOwnMessage
+                ? user?.name
+                : memberProfile?.name;
+              const senderAvatarEmail = isOwnMessage
+                ? user?.email
+                : memberProfile?.email;
+              const timeLabel =
+                item.role === "user" ||
+                item.role === "assistant" ||
+                item.role === "system"
+                  ? formatMessageTime(item.createdAt, resolvedTimezone)
+                  : undefined;
+
+              return (
+                <div key={item.clientKey}>
+                  {showDayDivider && dayDividerLabel ? (
+                    <ChatDayDivider label={dayDividerLabel} />
+                  ) : null}
+                  <div className={cn(sameRunAsPrevious ? "mt-1" : "mt-4")}>
+                    <MessageBubble
+                    message={item}
+                    isOwn={isOwnMessage}
+                    senderName={senderName}
+                    senderAvatarName={senderAvatarName}
+                    senderAvatarEmail={senderAvatarEmail}
+                    timeLabel={timeLabel}
+                    compactTop={sameRunAsPrevious}
+                    compactBottom={sameRunAsNext}
+                    onRetry={
+                      item.sendStatus === "failed"
+                        ? () => onRetry(item.clientKey)
+                        : undefined
+                    }
+                  />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : null}
       </div>

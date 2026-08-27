@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
-import { createPortal } from "react-dom";
+import {
+  DialogClose,
+  DialogContent,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "@/components/ui/icons";
 import {
@@ -31,27 +35,7 @@ export function AttachmentPreviewModal({
   open,
   onClose,
 }: AttachmentPreviewModalProps) {
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", onKeyDown);
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [open, onClose]);
-
-  if (!open || !attachment || typeof document === "undefined") {
+  if (!attachment) {
     return null;
   }
 
@@ -60,48 +44,43 @@ export function AttachmentPreviewModal({
     ("doc" as AttachmentKind);
   const viewUrl = attachment.fileUrl ?? attachment.previewUrl;
 
-  return createPortal(
-    <div className="fixed inset-0 z-[110] flex flex-col">
-      <button
-        type="button"
-        aria-label="Close preview"
-        className="absolute inset-0 bg-[var(--overlay)]"
-        onClick={onClose}
-      />
-
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="attachment-preview-title"
+  return (
+    <DialogRoot
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose();
+        }
+      }}
+    >
+      <DialogContent
+        showCloseButton={false}
         className={cn(
-          "relative z-10 mx-auto flex min-h-0 w-full flex-1 flex-col",
-          "mt-auto max-h-[100dvh] sm:my-auto sm:max-h-[min(92dvh,920px)]",
-          "sm:max-w-[min(960px,calc(100vw-2rem))]",
-          "rounded-t-[var(--radius-lg)] border border-border bg-card shadow-[var(--shadow-md)]",
-          "sm:rounded-[var(--radius-lg)]",
+          "flex min-h-0 w-full max-w-[min(960px,calc(100vw-2rem))] flex-col gap-0 overflow-hidden p-0",
+          "bottom-0 max-h-[100dvh] rounded-t-[var(--radius-lg)] sm:my-auto sm:max-h-[min(92dvh,920px)] sm:rounded-[var(--radius-lg)]",
         )}
       >
         <header className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-4 py-3 sm:px-5">
           <div className="min-w-0">
-            <h2
-              id="attachment-preview-title"
-              className="truncate text-sm font-semibold tracking-tight sm:text-base"
-            >
+            <DialogTitle className="truncate text-sm sm:text-base">
               {attachment.name}
-            </h2>
+            </DialogTitle>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {formatBytes(attachment.size)}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 shrink-0 px-0"
-            onClick={onClose}
-            aria-label="Close"
+          <DialogClose
+            render={
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 shrink-0 px-0"
+                aria-label="Close"
+              />
+            }
           >
             <XIcon />
-          </Button>
+          </DialogClose>
         </header>
 
         <div className="min-h-0 flex-1 overflow-auto overscroll-contain bg-muted/30">
@@ -136,8 +115,7 @@ export function AttachmentPreviewModal({
             </div>
           ) : null}
         </div>
-      </div>
-    </div>,
-    document.body,
+      </DialogContent>
+    </DialogRoot>
   );
 }

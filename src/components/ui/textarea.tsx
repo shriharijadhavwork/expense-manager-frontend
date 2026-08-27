@@ -1,12 +1,27 @@
-import { cn } from "@/utils/cn";
+import * as React from "react";
 
-type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+import { cn } from "@/lib/utils";
+
+function TextareaField({ className, ...props }: React.ComponentProps<"textarea">) {
+  return (
+    <textarea
+      data-slot="textarea"
+      className={cn(
+        "min-h-24 w-full rounded-[var(--radius-md)] border border-input bg-card px-3 py-2 text-sm text-foreground transition-colors outline-none placeholder:text-muted-foreground hover:border-foreground/20 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/30 dark:bg-input/30",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+type TextareaProps = React.ComponentProps<"textarea"> & {
   label?: string;
   error?: string;
   hint?: string;
 };
 
-export function Textarea({
+function Textarea({
   className,
   label,
   error,
@@ -26,17 +41,9 @@ export function Textarea({
           {label}
         </label>
       ) : null}
-      <textarea
+      <TextareaField
         id={textareaId}
-        className={cn(
-          "min-h-24 w-full rounded-[var(--radius-md)] border border-input bg-card px-3 py-2 text-sm text-foreground",
-          "placeholder:text-muted-foreground",
-          "transition-colors hover:border-foreground/20",
-          "focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          error && "border-destructive focus-visible:ring-destructive/30",
-          className,
-        )}
+        className={cn(error && "border-destructive focus-visible:ring-destructive/30", className)}
         aria-invalid={Boolean(error)}
         {...props}
       />
@@ -48,3 +55,5 @@ export function Textarea({
     </div>
   );
 }
+
+export { Textarea, TextareaField };

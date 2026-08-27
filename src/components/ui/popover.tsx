@@ -1,10 +1,56 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { cn } from "@/utils/cn";
+import * as React from "react";
+import { useRef } from "react";
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 
-type PopoverProps = {
+import { cn } from "@/lib/utils";
+
+function PopoverRoot({ ...props }: PopoverPrimitive.Root.Props) {
+  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
+}
+
+function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
+  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
+}
+
+function PopoverContent({
+  className,
+  align = "center",
+  alignOffset = 0,
+  side = "bottom",
+  sideOffset = 4,
+  anchor,
+  ...props
+}: PopoverPrimitive.Popup.Props &
+  Pick<
+    PopoverPrimitive.Positioner.Props,
+    "align" | "alignOffset" | "side" | "sideOffset" | "anchor"
+  >) {
+  return (
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Positioner
+        align={align}
+        alignOffset={alignOffset}
+        side={side}
+        sideOffset={sideOffset}
+        anchor={anchor}
+        className="isolate z-50"
+      >
+        <PopoverPrimitive.Popup
+          data-slot="popover-content"
+          className={cn(
+            "z-50 flex w-72 origin-(--transform-origin) flex-col gap-2.5 rounded-lg bg-popover p-2.5 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            className,
+          )}
+          {...props}
+        />
+      </PopoverPrimitive.Positioner>
+    </PopoverPrimitive.Portal>
+  );
+}
+
+type LegacyPopoverProps = {
   open: boolean;
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement | null>;
@@ -14,7 +60,7 @@ type PopoverProps = {
   align?: "start" | "center" | "end";
 };
 
-export function Popover({
+function Popover({
   open,
   onClose,
   anchorRef,
@@ -22,100 +68,30 @@ export function Popover({
   className,
   side = "top",
   align = "start",
-}: PopoverProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const [style, setStyle] = useState<React.CSSProperties>({
-    visibility: "hidden",
-  });
-
-  useLayoutEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const anchor = anchorRef.current;
-    const panel = panelRef.current;
-    if (!anchor || !panel) {
-      return;
-    }
-
-    const anchorRect = anchor.getBoundingClientRect();
-    const panelRect = panel.getBoundingClientRect();
-    const gap = 8;
-
-    let top =
-      side === "top"
-        ? anchorRect.top - panelRect.height - gap
-        : anchorRect.bottom + gap;
-
-    let left = anchorRect.left;
-    if (align === "center") {
-      left = anchorRect.left + anchorRect.width / 2 - panelRect.width / 2;
-    } else if (align === "end") {
-      left = anchorRect.right - panelRect.width;
-    }
-
-    const padding = 12;
-    const maxLeft = window.innerWidth - panelRect.width - padding;
-    left = Math.max(padding, Math.min(left, maxLeft));
-    top = Math.max(padding, top);
-
-    setStyle({
-      top,
-      left,
-      visibility: "visible",
-    });
-  }, [align, anchorRef, open, side]);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    const onPointerDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (
-        panelRef.current?.contains(target) ||
-        anchorRef.current?.contains(target)
-      ) {
-        return;
-      }
-
-      onClose();
-    };
-
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("mousedown", onPointerDown);
-
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("mousedown", onPointerDown);
-    };
-  }, [anchorRef, onClose, open]);
-
-  if (!open || typeof document === "undefined") {
-    return null;
-  }
-
-  return createPortal(
-    <div
-      ref={panelRef}
-      role="menu"
-      style={style}
-      className={cn(
-        "fixed z-[100] min-w-[15rem] overflow-visible rounded-[var(--radius-lg)] border border-border bg-card p-1.5 shadow-[var(--shadow-md)]",
-        className,
-      )}
+}: LegacyPopoverProps) {
+  return (
+    <PopoverRoot
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose();
+        }
+      }}
     >
-      {children}
-    </div>,
-    document.body,
+      <PopoverContent
+        anchor={anchorRef}
+        side={side}
+        align={align}
+        sideOffset={8}
+        className={cn(
+          "min-w-[15rem] overflow-visible rounded-[var(--radius-lg)] border border-border bg-card p-1.5 shadow-[var(--shadow-md)] ring-0",
+          className,
+        )}
+        role="menu"
+      >
+        {children}
+      </PopoverContent>
+    </PopoverRoot>
   );
 }
 
@@ -130,7 +106,7 @@ type PopoverItemProps = {
   trailing?: React.ReactNode;
 };
 
-export function PopoverItem({
+function PopoverItem({
   icon,
   label,
   hint,
@@ -183,11 +159,11 @@ export function PopoverItem({
   );
 }
 
-export function PopoverDivider() {
+function PopoverDivider() {
   return <div className="my-1.5 border-t border-border" />;
 }
 
-export function PopoverHeader({
+function PopoverHeader({
   name,
   subtitle,
   onClick,
@@ -239,7 +215,7 @@ type PopoverSubmenuProps = {
   children: React.ReactNode;
 };
 
-export function PopoverSubmenu({
+function PopoverSubmenu({
   icon,
   label,
   hint,
@@ -308,7 +284,7 @@ type PopoverOptionProps = {
   onClick?: () => void;
 };
 
-export function PopoverOption({
+function PopoverOption({
   label,
   selected = false,
   onClick,
@@ -350,3 +326,15 @@ function CheckIconSmall() {
     </svg>
   );
 }
+
+export {
+  Popover,
+  PopoverRoot,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverItem,
+  PopoverDivider,
+  PopoverHeader,
+  PopoverSubmenu,
+  PopoverOption,
+};

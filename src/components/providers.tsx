@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { TimezoneProvider } from "@/lib/timezone/timezone-provider";
 import { StoreProvider } from "@/lib/store/provider";
 import { ToastProvider } from "@/components/shared/toast";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +18,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <StoreProvider>
           <AuthProvider>
             <PreferencesSync />
-            <ToastProvider>{children}</ToastProvider>
+            <TooltipProvider>
+              <ToastProvider>{children}</ToastProvider>
+              <Toaster position="bottom-center" />
+            </TooltipProvider>
           </AuthProvider>
           </StoreProvider>
         </CurrencyProvider>
