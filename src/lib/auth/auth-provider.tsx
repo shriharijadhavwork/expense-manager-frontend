@@ -18,10 +18,11 @@ type AuthContextValue = {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  signup: (name: string, email: string, password: string) => Promise<User>;
+  logout: (redirectTo?: string) => Promise<void>;
   refreshUser: () => Promise<void>;
+  setUser: (user: User | null) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -84,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStoredToken(result.token);
     setToken(result.token);
     setUser(result.user);
+    return result.user;
   }, []);
 
   const signup = useCallback(
@@ -92,21 +94,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setStoredToken(result.token);
       setToken(result.token);
       setUser(result.user);
+      return result.user;
     },
     [],
   );
 
-  const logout = useCallback(async () => {
-    try {
-      await authApi.logout();
-    } catch {
-      // Client discard still happens even if logout endpoint fails.
-    }
-    setStoredToken(null);
-    setToken(null);
-    setUser(null);
-    router.replace("/login");
-  }, [router]);
+  const logout = useCallback(
+    async (redirectTo = "/login") => {
+      try {
+        await authApi.logout();
+      } catch {
+        // Client discard still happens even if logout endpoint fails.
+      }
+      setStoredToken(null);
+      setToken(null);
+      setUser(null);
+      router.replace(redirectTo);
+    },
+    [router],
+  );
 
   const value = useMemo(
     () => ({
@@ -118,6 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signup,
       logout,
       refreshUser,
+      setUser,
     }),
     [user, token, isLoading, login, signup, logout, refreshUser],
   );

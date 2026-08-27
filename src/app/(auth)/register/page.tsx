@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,13 +9,19 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/components/shared/toast";
+import { BrandLockup } from "@/components/brand/brand-lockup";
+import { sanitizeNextPath, withNextQuery } from "@/lib/auth/next-path";
 
 export default function RegisterPage() {
   const { signup } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+  const nextPath = sanitizeNextPath(searchParams.get("next"));
+  const invitedEmail = searchParams.get("email")?.trim() ?? "";
+
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(invitedEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -32,9 +38,17 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await signup(name.trim(), email.trim(), password);
-      toast({ title: "Account created", variant: "success" });
-      router.replace("/app");
+      const account = await signup(name.trim(), email.trim(), password);
+      toast({
+        title: "Check your email",
+        description: "Enter the verification code we sent you.",
+        variant: "success",
+      });
+      if (account.emailVerified === false) {
+        router.replace(withNextQuery("/verify-email", nextPath));
+        return;
+      }
+      router.replace(nextPath ?? "/app");
     } catch (err) {
       const message =
         err instanceof ApiError
@@ -49,14 +63,14 @@ export default function RegisterPage() {
   return (
     <Card className="w-full" padding="lg">
       <div className="mb-6">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Expense Manager
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+        <BrandLockup showTagline />
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight">
           Create account
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Start tracking spending with a calm, focused workspace.
+          {invitedEmail
+            ? "Use the invited email address so you can accept the group invite after signup."
+            : "Start tracking spending — go live, spend, we’ll keep score."}
         </p>
       </div>
 
@@ -77,6 +91,11 @@ export default function RegisterPage() {
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          hint={
+            invitedEmail
+              ? "Must match the email on the invite."
+              : undefined
+          }
         />
         <Input
           label="Password"
@@ -103,7 +122,7 @@ export default function RegisterPage() {
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link
-          href="/login"
+          href={withNextQuery("/login", nextPath)}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           Sign in

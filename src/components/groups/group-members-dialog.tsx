@@ -7,6 +7,9 @@ import { useToast } from "@/components/shared/toast";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { RelationSelect } from "@/components/ui/relation-select";
+import type { UserRelation } from "@/constants/relation";
+import { USER_RELATION_LABELS } from "@/constants/relation";
 import { ApiError } from "@/lib/api/client";
 import { groupsApi } from "@/lib/api/groups";
 import { notifyGroupsChanged } from "@/lib/groups/group-events";
@@ -35,6 +38,7 @@ export function GroupMembersDialog({
   const [loading, setLoading] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRelation, setInviteRelation] = useState<UserRelation>("friend");
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviting, setInviting] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -94,6 +98,7 @@ export function GroupMembersDialog({
     }
     setAddOpen(false);
     setInviteEmail("");
+    setInviteRelation("friend");
     setInviteError(null);
     onClose();
   }
@@ -112,17 +117,22 @@ export function GroupMembersDialog({
     setInviteError(null);
 
     try {
-      const invite = await groupsApi.createInvite(group.id, email);
+      const invite = await groupsApi.createInvite(
+        group.id,
+        email,
+        inviteRelation,
+      );
       setInvites((current) => {
         const without = current.filter((item) => item.id !== invite.id);
         return [invite, ...without];
       });
       setInviteEmail("");
+      setInviteRelation("friend");
       toast({
-        title: "Invite created",
+        title: "Invite sent",
         description: invite.inviteUrl
-          ? "Share the invite link from the list below."
-          : undefined,
+          ? "Email is queued when SMTP is configured. You can also copy the link below."
+          : "Email is queued when SMTP is configured.",
         variant: "success",
       });
     } catch (err) {
@@ -309,6 +319,9 @@ export function GroupMembersDialog({
                         <p className="truncate text-sm font-medium">{label}</p>
                         <p className="truncate text-xs text-muted-foreground">
                           {member.role === "owner" ? "Owner" : "Member"}
+                          {member.relation
+                            ? ` · ${USER_RELATION_LABELS[member.relation]}`
+                            : null}
                           {!isSelf ? (
                             <span className="ml-1 opacity-70">{member.email}</span>
                           ) : null}
@@ -365,6 +378,12 @@ export function GroupMembersDialog({
                     value={inviteEmail}
                     onChange={(event) => setInviteEmail(event.target.value)}
                   />
+                  <RelationSelect
+                    value={inviteRelation}
+                    onChange={setInviteRelation}
+                    label="Their relation to you"
+                    disabled={inviting}
+                  />
                   <Button type="submit" size="sm" loading={inviting}>
                     Send invite
                   </Button>
@@ -386,7 +405,8 @@ export function GroupMembersDialog({
                               {invite.email}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Pending · expires{" "}
+                              Pending ·{" "}
+                              {USER_RELATION_LABELS[invite.relation]} · expires{" "}
                               {new Date(invite.expiresAt).toLocaleDateString()}
                             </p>
                           </div>

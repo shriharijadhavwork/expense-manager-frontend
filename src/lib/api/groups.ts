@@ -3,10 +3,12 @@ import type {
   CreateGroupThreadInput,
   Group,
   GroupInvite,
+  InvitePreview,
   LeaveGroupResult,
   ResolveGroupInput,
   ResolveGroupResult,
   Thread,
+  UserRelation,
 } from "@/types/api";
 
 export const groupsApi = {
@@ -69,10 +71,24 @@ export const groupsApi = {
     return apiRequest<GroupInvite[]>(`/groups/${groupId}/invites`);
   },
 
-  createInvite(groupId: string, email: string): Promise<GroupInvite> {
+  createInvite(
+    groupId: string,
+    email: string,
+    relation: UserRelation,
+  ): Promise<GroupInvite> {
     return apiRequest<GroupInvite>(`/groups/${groupId}/invites`, {
       method: "POST",
-      body: { email },
+      body: { email, relation },
+    });
+  },
+
+  createDirectInvite(
+    email: string,
+    relation: UserRelation,
+  ): Promise<GroupInvite> {
+    return apiRequest<GroupInvite>("/invites/direct", {
+      method: "POST",
+      body: { email, relation },
     });
   },
 
@@ -88,6 +104,13 @@ export const groupsApi = {
   acceptInvite(token: string): Promise<Group> {
     return apiRequest<Group>(`/invites/${token}/accept`, {
       method: "POST",
+    });
+  },
+
+  previewInvite(token: string): Promise<InvitePreview> {
+    return apiRequest<InvitePreview>(`/invites/${token}`, {
+      method: "GET",
+      auth: false,
     });
   },
 };

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AttachmentCard, type ChatAttachment } from "@/components/chat/attachment-card";
+import { appConfig } from "@/config/env";
 import { attachmentPolicy } from "@/lib/files/attachment-policy";
 import { cn } from "@/utils/cn";
 
@@ -192,7 +193,7 @@ export function ChatComposer({
         </div>
 
         <p className="pt-2 text-center text-xs text-muted-foreground/75">
-          Expense Manager can make mistakes. Check important info.
+          {appConfig.appName} can make mistakes. Check important info.
         </p>
       </div>
     </div>

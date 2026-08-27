@@ -16,6 +16,13 @@ Canonical product + backend plan (including batches **0–9**):
 
 Backend batches **1–5** should land before or with **6**.
 
+## Follow-on
+
+Real invite email, signup OTP, and password reset:
+
+→ `expense-manager-backend/docs/email-and-auth-plan.md`  
+→ short FE pointer: `frontend/docs/email-and-auth-plan.md`
+
 ## How to execute
 
 Ask the agent for one batch at a time, e.g.:

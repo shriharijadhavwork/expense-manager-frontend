@@ -2,6 +2,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
+  emailVerified: boolean;
   preferences: UserPreferences;
 };
 
@@ -87,6 +88,14 @@ export type Thread = {
 
 export type GroupMemberRole = "owner" | "member";
 
+export type UserRelation =
+  | "friend"
+  | "family"
+  | "partner"
+  | "roommate"
+  | "colleague"
+  | "other";
+
 export type GroupMember = {
   id: string;
   groupId: string;
@@ -94,6 +103,7 @@ export type GroupMember = {
   name: string;
   email: string;
   role: GroupMemberRole;
+  relation: UserRelation | null;
   addedBy: string | null;
   joinedAt: string;
 };
@@ -118,6 +128,7 @@ export type GroupInvite = {
   groupId: string;
   email: string;
   invitedBy: string;
+  relation: UserRelation;
   status: GroupInviteStatus;
   expiresAt: string;
   inviteUrl: string | null;
@@ -125,6 +136,17 @@ export type GroupInvite = {
   acceptedBy: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type InvitePreview = {
+  email: string;
+  groupName: string;
+  status: GroupInviteStatus;
+  expiresAt: string;
+  relation: UserRelation;
+  relationLabel: string;
+  invitedByName: string;
+  invitedByEmail: string;
 };
 
 export type LeaveGroupResult = {

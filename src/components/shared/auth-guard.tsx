@@ -3,17 +3,25 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-provider";
+import { withNextQuery } from "@/lib/auth/next-path";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
+      router.replace(withNextQuery("/login", pathname));
+      return;
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+
+    if (user && user.emailVerified === false) {
+      router.replace(withNextQuery("/verify-email", pathname));
+    }
+  }, [isAuthenticated, isLoading, pathname, router, user]);
 
   if (isLoading) {
     return (
@@ -23,7 +31,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || user?.emailVerified === false) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />

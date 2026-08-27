@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { ChatWithDialog } from "@/components/groups/chat-with-dialog";
 import { GroupsSidebar } from "@/components/groups/groups-sidebar";
 import { ThreadSidebar } from "@/components/layout/thread-sidebar";
@@ -43,9 +44,7 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
       )}
     >
       <div className="flex shrink-0 items-center px-3 py-3.5">
-        <p className="px-2 text-[15px] font-semibold tracking-tight text-foreground/90">
-          Expense Manager
-        </p>
+        <BrandLockup size="sm" className="px-2" />
       </div>
 
       <div className="shrink-0 space-y-0.5 px-2 pb-2">

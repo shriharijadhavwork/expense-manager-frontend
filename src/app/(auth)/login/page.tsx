@@ -10,11 +10,15 @@ import { useAuth } from "@/lib/auth/auth-provider";
 import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/components/shared/toast";
 
+import { BrandLockup } from "@/components/brand/brand-lockup";
+import { sanitizeNextPath, withNextQuery } from "@/lib/auth/next-path";
+
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const nextPath = sanitizeNextPath(searchParams.get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,10 +30,13 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email.trim(), password);
+      const account = await login(email.trim(), password);
       toast({ title: "Welcome back", variant: "success" });
-      const next = searchParams.get("next");
-      router.replace(next && next.startsWith("/") ? next : "/app");
+      if (account.emailVerified === false) {
+        router.replace(withNextQuery("/verify-email", nextPath));
+        return;
+      }
+      router.replace(nextPath ?? "/app");
     } catch (err) {
       const message =
         err instanceof ApiError
@@ -44,10 +51,8 @@ export default function LoginPage() {
   return (
     <Card className="w-full" padding="lg">
       <div className="mb-6">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Expense Manager
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">Sign in</h1>
+        <BrandLockup showTagline />
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight">Sign in</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Access your expenses and conversations securely.
         </p>
@@ -84,10 +89,19 @@ export default function LoginPage() {
         </Button>
       </form>
 
+      <p className="mt-3 text-center text-sm">
+        <Link
+          href="/forgot-password"
+          className="font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          Forgot password?
+        </Link>
+      </p>
+
       <p className="mt-6 text-center text-sm text-muted-foreground">
         New here?{" "}
         <Link
-          href="/register"
+          href={withNextQuery("/register", nextPath)}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           Create an account

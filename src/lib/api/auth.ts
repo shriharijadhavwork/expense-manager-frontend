@@ -43,6 +43,38 @@ export const authApi = {
     });
   },
 
+  verifyEmail(code: string): Promise<User> {
+    return apiRequest<User>("/auth/verify-email", {
+      method: "POST",
+      body: { code },
+    });
+  },
+
+  resendOtp(): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>("/auth/resend-otp", {
+      method: "POST",
+    });
+  },
+
+  forgotPassword(email: string): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: { email },
+      auth: false,
+    });
+  },
+
+  resetPassword(input: {
+    token: string;
+    newPassword: string;
+  }): Promise<{ message: string }> {
+    return apiRequest<{ message: string }>("/auth/reset-password", {
+      method: "POST",
+      body: input,
+      auth: false,
+    });
+  },
+
   updateMe(input: {
     preferences: Partial<UserPreferences>;
   }): Promise<UserPreferences> {

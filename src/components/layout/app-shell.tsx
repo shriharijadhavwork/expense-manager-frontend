@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
@@ -47,9 +48,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               Menu
             </Button>
-            <p className="text-sm font-medium text-foreground/90">
-              Expense Manager
-            </p>
+            <BrandLockup size="sm" />
             <span className="w-[3.25rem]" aria-hidden />
           </header>
 
