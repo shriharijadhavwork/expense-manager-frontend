@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
+import { ChatWithDialog } from "@/components/groups/chat-with-dialog";
+import { GroupsSidebar } from "@/components/groups/groups-sidebar";
 import { ThreadSidebar } from "@/components/layout/thread-sidebar";
 import { SidebarAction, UserMenu } from "@/components/layout/user-menu";
-import { SquarePenIcon } from "@/components/ui/icons";
+import { SquarePenIcon, UsersIcon } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createLocalThreadId } from "@/lib/chat/local-thread";
 import { cn } from "@/utils/cn";
@@ -26,6 +28,7 @@ function ThreadSidebarFallback() {
 
 export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
   const router = useRouter();
+  const [chatWithOpen, setChatWithOpen] = useState(false);
 
   function startNewChat() {
     router.push(`/app/chat?threadId=${createLocalThreadId()}`);
@@ -45,19 +48,35 @@ export function AppSidebar({ className, onNavigate }: AppSidebarProps) {
         </p>
       </div>
 
-      <div className="shrink-0 px-2 pb-2">
+      <div className="shrink-0 space-y-0.5 px-2 pb-2">
         <SidebarAction
           icon={<SquarePenIcon className="h-4 w-4" />}
           label="New chat"
           onClick={startNewChat}
         />
+        <SidebarAction
+          icon={<UsersIcon className="h-4 w-4" />}
+          label="Chat with…"
+          onClick={() => setChatWithOpen(true)}
+        />
       </div>
 
-      <Suspense fallback={<ThreadSidebarFallback />}>
-        <ThreadSidebar onNavigate={onNavigate} />
-      </Suspense>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <Suspense fallback={<ThreadSidebarFallback />}>
+          <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+            <GroupsSidebar onNavigate={onNavigate} />
+            <ThreadSidebar onNavigate={onNavigate} embedded />
+          </div>
+        </Suspense>
+      </div>
 
       <UserMenu onNavigate={onNavigate} />
+
+      <ChatWithDialog
+        open={chatWithOpen}
+        onClose={() => setChatWithOpen(false)}
+        onStarted={onNavigate}
+      />
     </aside>
   );
 }

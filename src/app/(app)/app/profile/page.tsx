@@ -38,6 +38,17 @@ export default function ProfilePage() {
               Email
             </dt>
             <dd className="mt-1 text-sm font-medium">{user?.email}</dd>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Share this email so others can start a group chat with you.
+            </p>
+          </div>
+          <div className="sm:col-span-2">
+            <dt className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              User ID
+            </dt>
+            <dd className="mt-1 break-all font-mono text-sm font-medium text-muted-foreground">
+              {user?.id}
+            </dd>
           </div>
         </dl>
       </Card>

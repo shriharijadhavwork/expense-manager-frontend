@@ -7,19 +7,25 @@ import {
   useRef,
   useState,
 } from "react";
+import { GroupHeaderActions } from "@/components/groups/group-members-dialog";
 import type { ChatAttachment } from "@/components/chat/attachment-card";
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { ErrorState } from "@/components/shared/error-state";
+import { useToast } from "@/components/shared/toast";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api/client";
 import { filesApi } from "@/lib/api/files";
+import { groupsApi } from "@/lib/api/groups";
 import { messagesApi } from "@/lib/api/messages";
 import { threadsApi } from "@/lib/api/threads";
+import { useAuth } from "@/lib/auth/auth-provider";
 import { isLocalThreadId, isPersistedThreadId } from "@/lib/chat/local-thread";
 import { isAllowedAttachment } from "@/lib/files/attachment-policy";
 import { shouldPersistReadState } from "@/lib/chat/thread-read-state";
 import { notifyThreadsChanged } from "@/lib/chat/thread-events";
+import { notifyGroupsChanged } from "@/lib/groups/group-events";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { store } from "@/lib/store";
 import {
@@ -31,6 +37,7 @@ import {
 import type { DisplayMessage } from "@/components/chat/types";
 
 import type { Message, Thread, UploadedFile } from "@/types/api";
+import { useSearchParams } from "next/navigation";
 
 const MESSAGE_PAGE_SIZE = 30;
 const LOAD_OLDER_THRESHOLD_PX = 80;
@@ -96,7 +103,12 @@ function createLocalThreadPlaceholder(threadId: string): Thread {
 
   return {
     id: threadId,
-    userId: "",
+    type: "personal",
+    userId: null,
+    groupId: null,
+    createdBy: "",
+    dayKey: "",
+    sequence: 1,
     title: "New conversation",
     lastActivityAt: now,
     readAt: null,
@@ -119,9 +131,16 @@ export function ChatWorkspace({
   skipInitialLoadRef,
 }: ChatWorkspaceProps) {
   const dispatch = useAppDispatch();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const groupIdParam = searchParams.get("groupId");
   const [persistedThreadId, setPersistedThreadId] = useState<string | null>(() =>
     isPersistedThreadId(threadId) ? threadId : null,
   );
+  const [deletingThread, setDeletingThread] = useState(false);
+  const [restoringThread, setRestoringThread] = useState(false);
+  const [isGroupOwner, setIsGroupOwner] = useState(false);
   const activeThreadId = isPersistedThreadId(threadId)
     ? threadId
     : persistedThreadId;
@@ -172,6 +191,11 @@ export function ChatWorkspace({
   const persistThreadRead = useCallback(
     (targetThreadId: string, readAt?: string) => {
       if (!shouldPersistReadState(targetThreadId)) {
+        return;
+      }
+
+      const current = selectThreadById(store.getState(), targetThreadId);
+      if (current?.type === "group") {
         return;
       }
 
@@ -282,12 +306,26 @@ export function ChatWorkspace({
       await dispatch(fetchThread(id)).unwrap();
       setThreadLoadStatus("idle");
     } catch (err) {
+      if (groupIdParam) {
+        try {
+          const groupThreads = await groupsApi.listThreads(groupIdParam);
+          const match = groupThreads.find((item) => item.id === id);
+          if (match) {
+            dispatch(upsertThread(match));
+            setThreadLoadStatus("idle");
+            return;
+          }
+        } catch {
+          // fall through
+        }
+      }
+
       setThreadError(
         err instanceof ApiError ? err.message : "Failed to load thread.",
       );
       setThreadLoadStatus("error");
     }
-  }, [dispatch, persistedThreadId, threadId]);
+  }, [dispatch, groupIdParam, persistedThreadId, threadId]);
 
   const loadLatestMessages = useCallback(async () => {
     const apiThreadId = apiThreadIdRef.current;
@@ -390,6 +428,42 @@ export function ChatWorkspace({
 
     return persistPromiseRef.current;
   }, [dispatch, onThreadIdChange]);
+
+  useEffect(() => {
+    const groupId = thread?.groupId ?? groupIdParam;
+    let cancelled = false;
+
+    const frame = window.requestAnimationFrame(() => {
+      if (!user || thread?.type !== "group" || !groupId) {
+        if (!cancelled) {
+          setIsGroupOwner(false);
+        }
+        return;
+      }
+
+      void groupsApi
+        .getById(groupId)
+        .then((group) => {
+          if (cancelled) return;
+          setIsGroupOwner(
+            group.members.some(
+              (member) =>
+                member.userId === user.id && member.role === "owner",
+            ),
+          );
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setIsGroupOwner(false);
+          }
+        });
+    });
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+    };
+  }, [groupIdParam, thread?.groupId, thread?.type, user]);
 
   useEffect(() => {
     if (skipInitialLoadRef?.current) {
@@ -653,7 +727,62 @@ export function ChatWorkspace({
 
   const canSend =
     Boolean(threadStatus === "success" && (message.trim() || pending)) &&
-    !sending;
+    !sending &&
+    !thread?.deletedAt;
+
+  const canManageGroupDelete =
+    thread?.type === "group" &&
+    Boolean(user) &&
+    (thread.createdBy === user?.id || isGroupOwner);
+
+  async function onDeleteGroupThread() {
+    if (!activeThreadId || !thread || thread.type !== "group") return;
+
+    setDeletingThread(true);
+    try {
+      await threadsApi.remove(activeThreadId);
+      dispatch(
+        upsertThread({
+          ...thread,
+          deletedAt: new Date().toISOString(),
+        }),
+      );
+      notifyThreadsChanged();
+      notifyGroupsChanged();
+      toast({ title: "Moved to recycle bin", variant: "success" });
+    } catch (err) {
+      toast({
+        title: "Could not delete conversation",
+        description:
+          err instanceof ApiError ? err.message : "Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setDeletingThread(false);
+    }
+  }
+
+  async function onRestoreThread() {
+    if (!activeThreadId || !thread?.deletedAt) return;
+
+    setRestoringThread(true);
+    try {
+      const restored = await threadsApi.restore(activeThreadId);
+      dispatch(upsertThread(restored));
+      notifyThreadsChanged();
+      notifyGroupsChanged();
+      toast({ title: "Conversation restored", variant: "success" });
+    } catch (err) {
+      toast({
+        title: "Could not restore conversation",
+        description:
+          err instanceof ApiError ? err.message : "Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setRestoringThread(false);
+    }
+  }
 
   if (threadStatus === "loading") {
     return (
@@ -680,10 +809,27 @@ export function ChatWorkspace({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
-      <header className="flex shrink-0 items-center justify-center px-4 py-3 sm:px-6">
+      <header className="flex shrink-0 flex-col items-center justify-center gap-1 px-4 py-3 sm:px-6">
         <h1 className="max-w-[min(100%,680px)] truncate text-sm font-medium text-muted-foreground">
           {thread?.title ?? "Chat"}
         </h1>
+        {thread?.type === "group" && (thread.groupId || groupIdParam) ? (
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <GroupHeaderActions
+              groupId={thread.groupId ?? groupIdParam!}
+            />
+            {!thread.deletedAt && canManageGroupDelete ? (
+              <button
+                type="button"
+                disabled={deletingThread}
+                onClick={() => void onDeleteGroupThread()}
+                className="cursor-pointer text-[11px] text-muted-foreground/80 underline-offset-2 hover:text-destructive hover:underline disabled:opacity-50"
+              >
+                {deletingThread ? "Deleting…" : "Delete chat"}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </header>
 
       <div
@@ -741,12 +887,31 @@ export function ChatWorkspace({
         ) : null}
       </div>
 
+      {thread?.deletedAt ? (
+        <div className="mx-auto w-full max-w-3xl shrink-0 px-4 pb-2 sm:px-6">
+          <div className="flex flex-col items-start gap-2 rounded-[var(--radius-md)] border border-border bg-muted/40 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              In Recycle Bin — restore to continue
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              loading={restoringThread}
+              onClick={() => void onRestoreThread()}
+            >
+              Restore
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <ChatComposer
         message={message}
         pending={pending}
         fileError={fileError}
         sending={sending}
         canSend={canSend}
+        disabled={Boolean(thread?.deletedAt)}
         onMessageChange={setMessage}
         onSend={() => void onSend()}
         onFileChange={onFileChange}

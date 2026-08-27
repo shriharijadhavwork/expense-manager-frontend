@@ -131,11 +131,21 @@ export function UserMenu({ onNavigate, className }: UserMenuProps) {
     setRestoring(true);
 
     try {
-      await threadsApi.restore(restoreTarget.id);
+      const restored = await threadsApi.restore(restoreTarget.id);
       toast({ title: "Conversation restored", variant: "success" });
       setRestoreTarget(null);
       await loadRecycleBin();
       notifyThreadsChanged();
+      closeMenu();
+
+      if (restored.type === "group" && restored.groupId) {
+        router.push(
+          `/app/chat?threadId=${restored.id}&groupId=${restored.groupId}`,
+        );
+      } else {
+        router.push(`/app/chat?threadId=${restored.id}`);
+      }
+      onNavigate?.();
     } catch (err) {
       toast({
         title: "Could not restore conversation",
@@ -300,25 +310,38 @@ export function UserMenu({ onNavigate, className }: UserMenuProps) {
               >
                 <span className="min-w-0 flex-1 truncate px-2 py-2 text-sm">
                   {thread.title}
+                  {thread.type === "group" ? (
+                    <span className="ml-1 text-[10px] text-muted-foreground">
+                      Group
+                    </span>
+                  ) : null}
                 </span>
-                <button
-                  type="button"
-                  aria-label="Restore"
-                  title="Restore"
-                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-background hover:text-foreground group-hover:opacity-100"
-                  onClick={() => setRestoreTarget(thread)}
-                >
-                  <RotateCcwIcon className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Delete permanently"
-                  title="Delete permanently"
-                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-background hover:text-destructive group-hover:opacity-100"
-                  onClick={() => setPurgeTarget(thread)}
-                >
-                  <TrashIcon className="h-3.5 w-3.5" />
-                </button>
+                {thread.canManageRecycle !== false ? (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Restore"
+                      title="Restore"
+                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-background hover:text-foreground group-hover:opacity-100"
+                      onClick={() => setRestoreTarget(thread)}
+                    >
+                      <RotateCcwIcon className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Delete permanently"
+                      title="Delete permanently"
+                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-background hover:text-destructive group-hover:opacity-100"
+                      onClick={() => setPurgeTarget(thread)}
+                    >
+                      <TrashIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </>
+                ) : (
+                  <span className="px-2 text-[10px] text-muted-foreground">
+                    View only
+                  </span>
+                )}
               </div>
             ))
           )}

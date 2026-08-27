@@ -11,6 +11,17 @@ type MessageBubbleProps = {
 
 export function MessageBubble({ message, onRetry }: MessageBubbleProps) {
   const isUser = message.role === "user";
+  const isSystem = message.role === "system";
+
+  if (isSystem) {
+    return (
+      <div className="flex w-full justify-center px-2 py-1">
+        <p className="max-w-[min(90%,520px)] text-center text-xs text-muted-foreground">
+          {message.content}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("flex w-full", isUser ? "justify-end" : "justify-start")}>

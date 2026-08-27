@@ -24,9 +24,15 @@ import { cn } from "@/utils/cn";
 type ThreadSidebarProps = {
   className?: string;
   onNavigate?: () => void;
+  /** When true, omit outer flex/scroll shell (parent owns scrolling). */
+  embedded?: boolean;
 };
 
-export function ThreadSidebar({ className, onNavigate }: ThreadSidebarProps) {
+export function ThreadSidebar({
+  className,
+  onNavigate,
+  embedded = false,
+}: ThreadSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentThreadId = searchParams.get("threadId");
@@ -117,8 +123,19 @@ export function ThreadSidebar({ className, onNavigate }: ThreadSidebarProps) {
 
   return (
     <>
-      <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+      <div
+        className={cn(
+          embedded ? undefined : "flex min-h-0 flex-1 flex-col",
+          className,
+        )}
+      >
+        <div
+          className={cn(
+            embedded
+              ? undefined
+              : "min-h-0 flex-1 overflow-y-auto px-2 pb-2",
+          )}
+        >
           {status === "loading" && threads.length === 0 ? (
             <div className="space-y-2 px-1 py-1">
               <Skeleton className="h-8 w-full" />

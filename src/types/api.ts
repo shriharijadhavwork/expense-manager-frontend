@@ -19,6 +19,7 @@ export type AuthResult = {
 export type Expense = {
   id: string;
   userId: string;
+  groupId?: string;
   amount: number;
   currency: string;
   /** Locale-grouped amount without symbol, e.g. "50,000". */
@@ -56,6 +57,8 @@ export type SearchExpensesInput = {
 
 export type MessageRole = "user" | "assistant" | "system" | "tool";
 
+export type ThreadType = "personal" | "group";
+
 export type ThreadLastMessage = {
   content: string;
   role: MessageRole;
@@ -65,7 +68,12 @@ export type ThreadLastMessage = {
 
 export type Thread = {
   id: string;
-  userId: string;
+  type: ThreadType;
+  userId: string | null;
+  groupId: string | null;
+  createdBy: string;
+  dayKey: string;
+  sequence: number;
   title: string;
   lastActivityAt: string;
   readAt: string | null;
@@ -74,6 +82,71 @@ export type Thread = {
   createdAt: string;
   updatedAt: string;
   lastMessage?: ThreadLastMessage | null;
+  canManageRecycle?: boolean;
+};
+
+export type GroupMemberRole = "owner" | "member";
+
+export type GroupMember = {
+  id: string;
+  groupId: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: GroupMemberRole;
+  addedBy: string | null;
+  joinedAt: string;
+};
+
+export type Group = {
+  id: string;
+  name: string;
+  createdBy: string;
+  members: GroupMember[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GroupInviteStatus =
+  | "pending"
+  | "accepted"
+  | "revoked"
+  | "expired";
+
+export type GroupInvite = {
+  id: string;
+  groupId: string;
+  email: string;
+  invitedBy: string;
+  status: GroupInviteStatus;
+  expiresAt: string;
+  inviteUrl: string | null;
+  acceptedAt: string | null;
+  acceptedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LeaveGroupResult = {
+  message: string;
+  dissolved: boolean;
+};
+
+export type ResolveGroupInput = {
+  emails?: string[];
+  memberIds?: string[];
+  name?: string;
+  title?: string;
+};
+
+export type ResolveGroupResult = {
+  group: Group;
+  thread: Thread;
+  created: boolean;
+};
+
+export type CreateGroupThreadInput = {
+  title?: string;
 };
 
 export type CreateThreadInput = {

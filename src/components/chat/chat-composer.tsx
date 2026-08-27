@@ -11,6 +11,7 @@ type ChatComposerProps = {
   fileError: string | null;
   sending: boolean;
   canSend: boolean;
+  disabled?: boolean;
   onMessageChange: (value: string) => void;
   onSend: () => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -23,6 +24,7 @@ export function ChatComposer({
   fileError,
   sending,
   canSend,
+  disabled = false,
   onMessageChange,
   onSend,
   onFileChange,
@@ -131,7 +133,7 @@ export function ChatComposer({
             type="button"
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
             onClick={openFilePicker}
-            disabled={sending}
+            disabled={sending || disabled}
             aria-label="Attach receipt"
             title="Attach receipt"
             onKeyDown={(event) => {
@@ -150,8 +152,8 @@ export function ChatComposer({
             ref={textareaRef}
             rows={1}
             value={message}
-            placeholder="Ask anything"
-            disabled={sending}
+            placeholder={disabled ? "Restore to continue" : "Ask anything"}
+            disabled={sending || disabled}
             className={cn(
               "composer-textarea max-h-40 min-h-9 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-[0.9375rem] leading-relaxed text-foreground",
               "placeholder:text-muted-foreground/70",
@@ -161,7 +163,9 @@ export function ChatComposer({
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
-                onSend();
+                if (!disabled) {
+                  onSend();
+                }
               }
             }}
           />

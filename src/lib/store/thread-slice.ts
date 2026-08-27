@@ -70,10 +70,14 @@ const threadsSlice = createSlice({
   initialState,
   reducers: {
     upsertThread(state, action: PayloadAction<Thread>) {
-      state.byId[action.payload.id] = action.payload;
+      const thread = action.payload;
+      state.byId[thread.id] = thread;
 
-      if (!state.listIds.includes(action.payload.id)) {
-        state.listIds.unshift(action.payload.id);
+      if (
+        thread.type !== "group" &&
+        !state.listIds.includes(thread.id)
+      ) {
+        state.listIds.unshift(thread.id);
       }
     },
   },
@@ -117,7 +121,10 @@ export const selectThreadById = (state: ThreadSliceRootState, threadId: string) 
 export const selectThreadList = (state: ThreadSliceRootState): Thread[] =>
   state.threads.listIds
     .map((id) => state.threads.byId[id])
-    .filter((thread): thread is Thread => Boolean(thread));
+    .filter(
+      (thread): thread is Thread =>
+        Boolean(thread) && thread.type !== "group",
+    );
 
 export const selectThreadsListStatus = (state: ThreadSliceRootState) =>
   state.threads.listStatus;

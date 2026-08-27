@@ -307,6 +307,9 @@ export function ExpenseWorkspace({
                     </p>
                     <Badge tone="primary">{capitalize(expense.category)}</Badge>
                     <Badge>{expense.currency}</Badge>
+                    {expense.groupId ? (
+                      <Badge tone="success">Group</Badge>
+                    ) : null}
                   </div>
                   <p className="mt-1 truncate text-sm text-foreground">
                     {expense.note || "No note"}
