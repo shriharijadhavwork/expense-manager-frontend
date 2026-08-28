@@ -122,6 +122,104 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* FLUX landing — scoped to .landing; app interior unchanged */
+.landing {
+  --landing-bg: oklch(0.985 0.006 85);
+  --landing-fg: oklch(0.18 0.01 75);
+  --landing-muted: oklch(0.55 0.015 75);
+  --landing-border: oklch(0.9 0.008 85);
+  --landing-surface: oklch(0.995 0.004 85);
+  --landing-accent: oklch(0.45 0.08 165);
+  --landing-accent-fg: oklch(0.99 0.004 85);
+  --landing-accent-soft: oklch(0.94 0.03 165);
+  --landing-warm: oklch(0.72 0.06 65);
+  background-color: var(--landing-bg);
+  color: var(--landing-fg);
+}
+
+.dark .landing {
+  --landing-bg: oklch(0.16 0.01 75);
+  --landing-fg: oklch(0.96 0.006 85);
+  --landing-muted: oklch(0.65 0.015 75);
+  --landing-border: oklch(0.28 0.01 75);
+  --landing-surface: oklch(0.22 0.01 75);
+  --landing-accent: oklch(0.62 0.1 165);
+  --landing-accent-fg: oklch(0.14 0.02 165);
+  --landing-accent-soft: oklch(0.26 0.04 165);
+  --landing-warm: oklch(0.78 0.07 65);
+}
+
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing .landing-enter {
+  animation: landing-fade-up 0.45s ease-out both;
+}
+
+@keyframes landing-typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+.landing .landing-typing-dot {
+  animation: landing-typing-dot 1.1s ease-in-out infinite;
+}
+
+.landing ::selection {
+  background: color-mix(in oklab, var(--landing-accent) 22%, transparent);
+}
+
+.landing .landing-scroll-row {
+  scrollbar-width: thin;
+  scrollbar-color: var(--landing-border) transparent;
+}
+
+.landing .hero-conversation-carousel,
+.landing .hero-conversation-carousel .hero-conversation-swiper,
+.landing .hero-conversation-carousel .swiper-wrapper,
+.landing .hero-conversation-carousel .swiper-slide {
+  width: 100% !important;
+  max-width: 100%;
+  height: 100% !important;
+}
+
+.landing .hero-conversation-carousel .swiper-slide {
+  flex-shrink: 0;
+}
+
+.landing .hero-conversation-carousel .swiper-slide > * {
+  width: 100%;
+  height: 100%;
+}
+
+/* Hero chat: fixed viewport, scroll inside — hide scrollbar, fade top edge */
+.landing .hero-chat-messages--mac {
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12px);
+}
+
+.landing .hero-chat-messages--mac::-webkit-scrollbar {
+  display: none;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -161,6 +259,15 @@
   --color-chat-assistant: var(--chat-assistant);
   --color-chat-assistant-foreground: var(--chat-assistant-foreground);
   --color-composer-surface: var(--composer-surface);
+  --color-landing-bg: var(--landing-bg);
+  --color-landing-fg: var(--landing-fg);
+  --color-landing-muted: var(--landing-muted);
+  --color-landing-border: var(--landing-border);
+  --color-landing-surface: var(--landing-surface);
+  --color-landing-accent: var(--landing-accent);
+  --color-landing-accent-fg: var(--landing-accent-fg);
+  --color-landing-accent-soft: var(--landing-accent-soft);
+  --color-landing-warm: var(--landing-warm);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-instrument-serif);

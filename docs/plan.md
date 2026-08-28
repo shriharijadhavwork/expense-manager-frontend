@@ -2,6 +2,8 @@
 
 > **Status:** 70% implementation plan — expected to evolve as the product is built.
 
+**Also implemented (not originally in this plan):** FLUX public landing page at `/` — see [`docs/landing-page.md`](landing-page.md).
+
 ## 1. Goal
 
 Build a web client that is independent of the backend implementation and can later coexist with a Flutter mobile client.
