@@ -17,29 +17,12 @@ export function LandingPrimaryCta({
   className,
   size = "default",
   trailingArrow = false,
-  guestLabel = "Start with FLUX",
+  guestLabel = "Talk to FLUX",
   authenticatedLabel = "Open app",
 }: LandingPrimaryCtaProps) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <Button
-        size={size}
-        disabled
-        className={cn(
-          "bg-landing-accent text-landing-accent-fg",
-          className,
-        )}
-        aria-busy="true"
-      >
-        {guestLabel}
-        {trailingArrow ? " →" : ""}
-      </Button>
-    );
-  }
-
-  if (isAuthenticated) {
+  if (!isLoading && isAuthenticated) {
     return (
       <Button
         size={size}
@@ -66,6 +49,7 @@ export function LandingPrimaryCta({
         "focus-visible:ring-landing-accent",
         className,
       )}
+      aria-busy={isLoading || undefined}
     >
       {guestLabel}
       {trailingArrow ? " →" : ""}

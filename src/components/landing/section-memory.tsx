@@ -1,89 +1,238 @@
-import { EntityAvatar } from "@/components/ui/entity-avatar";
 import { LandingDisclaimer } from "@/components/landing/landing-disclaimer";
 import { LandingSection } from "@/components/landing/landing-section";
-import { landingFluxAvatarClassName } from "@/components/landing/landing-styles";
 import { cn } from "@/utils/cn";
 
-function FlatRecordCard() {
-  return (
-    <div className="rounded-[var(--radius-lg)] border border-landing-border bg-landing-bg p-5 sm:p-6">
-      <p className="text-sm font-medium text-landing-muted">
-        A typical tracker
-      </p>
-      <p className="mt-5 font-mono text-2xl font-medium tabular-nums tracking-tight text-landing-fg">
-        ₹1,240
-      </p>
-      <p className="mt-1 text-base text-landing-muted">Food</p>
-    </div>
-  );
-}
+const MEMORY_LAYERS = [
+  {
+    id: "amount",
+    step: "01",
+    title: "Amount & category",
+    typical: "₹1,240 · Food",
+    flux: "₹1,240 · Dining",
+    note: "Most trackers stop here — a number and a label.",
+  },
+  {
+    id: "people",
+    step: "02",
+    title: "People & split",
+    typical: "—",
+    flux: "Rahul & Priya · Your share ₹620",
+    note: "Who was involved and what you actually paid.",
+  },
+  {
+    id: "thread",
+    step: "03",
+    title: "Thread & timing",
+    typical: "—",
+    flux: "Weekend trip · Yesterday",
+    note: "Which conversation it belongs to, and when.",
+  },
+] as const;
 
-function ContextRecordCard() {
+const RECALL_SOURCES = [
+  { label: "Cab", amount: "₹800 each" },
+  { label: "Airbnb", amount: "₹600 each" },
+] as const;
+
+const RECALL_BALANCES = [
+  { name: "Meera", amount: "₹1,400" },
+  { name: "Rohan", amount: "₹1,400" },
+] as const;
+
+function FlatTrackerStrip() {
   return (
     <div
-      className={cn(
-        "rounded-[var(--radius-lg)] border border-landing-accent/25 bg-landing-accent-soft/40 p-5 sm:p-6",
-      )}
+      className="rounded-[var(--radius-md)] border border-dashed border-landing-friction/25 bg-landing-friction-soft/25 px-4 py-3"
+      aria-hidden
     >
-      <p className="text-sm font-medium text-landing-fg">FLUX</p>
-      <p className="mt-5 font-mono text-2xl font-medium tabular-nums tracking-tight text-landing-fg">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-landing-friction">
+        Typical tracker remembers
+      </p>
+      <p className="mt-2 font-mono text-xl font-semibold tabular-nums text-landing-fg">
         ₹1,240
       </p>
-      <p className="mt-1 text-base text-landing-fg">Dining</p>
-      <dl className="mt-4 space-y-1 border-t border-landing-accent/15 pt-4">
-        <div>
-          <dt className="sr-only">Context</dt>
-          <dd className="text-sm text-landing-muted">Dinner with Rahul & Priya</dd>
-        </div>
-        <div>
-          <dt className="sr-only">Split</dt>
-          <dd className="text-sm text-landing-muted">Your share · ₹620</dd>
-        </div>
-        <div>
-          <dt className="sr-only">When</dt>
-          <dd className="text-sm text-landing-muted">Yesterday</dd>
-        </div>
-      </dl>
+      <p className="mt-0.5 text-sm text-landing-muted">Food</p>
+      <p className="mt-3 text-[12px] leading-relaxed text-landing-muted">
+        No people. No split. No thread. Context is gone by tomorrow.
+      </p>
     </div>
   );
 }
 
-function FollowUpExchange() {
+function MemoryLayerRow({
+  layer,
+  isLast,
+}: {
+  layer: (typeof MEMORY_LAYERS)[number];
+  isLast?: boolean;
+}) {
   return (
-    <div className="rounded-[var(--radius-lg)] border border-landing-border bg-landing-surface p-5 sm:p-6">
-      <p className="text-sm font-medium text-landing-muted">
-        Later, you can ask:
+    <li className="relative flex gap-4 pb-8 last:pb-0">
+      {!isLast ? (
+        <span
+          className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-gradient-to-b from-landing-accent/45 to-landing-accent/10"
+          aria-hidden
+        />
+      ) : null}
+
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-landing-accent bg-landing-bg font-mono text-[10px] font-bold text-landing-accent">
+        {layer.step}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-landing-fg">{layer.title}</p>
+        <p className="mt-1 text-[12px] leading-relaxed text-landing-muted">
+          {layer.note}
+        </p>
+
+        <div className="landing-memory-layer mt-3 overflow-hidden rounded-[var(--radius-md)] border border-landing-border">
+          <div className="grid sm:grid-cols-2">
+            <div className="border-b border-landing-border/70 bg-landing-bg/50 px-3 py-2.5 sm:border-b-0 sm:border-r">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
+                Typical
+              </p>
+              <p
+                className={cn(
+                  "mt-1 font-mono text-[13px] tabular-nums",
+                  layer.typical === "—"
+                    ? "text-landing-muted/50"
+                    : "text-landing-muted",
+                )}
+              >
+                {layer.typical}
+              </p>
+            </div>
+            <div className="px-3 py-2.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-landing-accent">
+                FLUX keeps
+              </p>
+              <p className="mt-1 text-[13px] font-medium text-landing-fg">
+                {layer.flux}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function MemoryLayersPanel() {
+  return (
+    <div className="rounded-[var(--radius-lg)] border border-landing-border bg-landing-bg p-5 sm:p-6">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
+        What gets remembered
+      </p>
+      <p className="mt-2 text-sm leading-relaxed text-landing-muted">
+        One dinner mention — three layers of context that stay linked.
       </p>
 
-      <div className="mt-5 space-y-4">
-        <div className="flex justify-end">
-          <p className="max-w-md rounded-[1rem] rounded-br-[0.375rem] border border-landing-border bg-landing-bg px-3.5 py-2.5 text-[15px] leading-relaxed text-landing-fg">
-            Who still owes me for the weekend trip?
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start">
+        <FlatTrackerStrip />
+
+        <ol className="space-y-0">
+          {MEMORY_LAYERS.map((layer, index) => (
+            <MemoryLayerRow
+              key={layer.id}
+              layer={layer}
+              isLast={index === MEMORY_LAYERS.length - 1}
+            />
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+function RecallResultPanel() {
+  return (
+    <div className="landing-memory-recall rounded-[var(--radius-lg)] border border-landing-accent/20 p-5 sm:p-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
+            Later, you ask
+          </p>
+          <div className="mt-3 rounded-[var(--radius-md)] border border-landing-border bg-white/85 px-4 py-3">
+            <p className="text-[13px] leading-relaxed text-landing-fg">
+              &ldquo;Who still owes me for the weekend trip?&rdquo;
+            </p>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 text-[11px] text-landing-muted">
+            <span className="h-px flex-1 bg-landing-border" />
+            <span className="font-semibold uppercase tracking-[0.1em] text-landing-accent">
+              FLUX recalls
+            </span>
+            <span className="h-px flex-1 bg-landing-border" />
+          </div>
+
+          <p className="mt-3 text-[12px] leading-relaxed text-landing-muted">
+            Pulled from the{" "}
+            <span className="font-medium text-landing-fg">Weekend trip</span>{" "}
+            thread — not a generic ledger search.
           </p>
         </div>
 
-        <div className="flex items-start gap-2">
-          <EntityAvatar
-            name="Flux"
-            variant="neutral"
-            size="chat"
-            initials="Fx"
-            className={cn("mt-0.5", landingFluxAvatarClassName)}
-            aria-hidden
-          />
-          <p className="pt-1 text-[15px] leading-relaxed text-landing-fg">
-            <span className="font-mono font-medium tabular-nums">₹2,800</span>
-            <span className="text-landing-muted">
-              {" "}
-              outstanding — Meera owes ₹1,400, Rohan owes ₹1,400 from the trip.
+        <div
+          className="rounded-[var(--radius-md)] border border-landing-border bg-white/90 p-4"
+          aria-hidden
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
+              Trip balance
+            </p>
+            <span className="rounded-full bg-landing-accent/10 px-2.5 py-0.5 text-[10px] font-semibold text-landing-accent">
+              Weekend trip
+            </span>
+          </div>
+
+          <p className="mt-3 font-mono text-2xl font-semibold tabular-nums text-landing-accent">
+            ₹2,800
+            <span className="ml-2 text-sm font-normal text-landing-muted">
+              outstanding to you
             </span>
           </p>
+
+          <ul className="mt-4 space-y-2 border-t border-landing-border/70 pt-4">
+            {RECALL_BALANCES.map((balance) => (
+              <li
+                key={balance.name}
+                className="flex items-center justify-between gap-3 text-[13px]"
+              >
+                <span className="text-landing-fg">{balance.name} owes you</span>
+                <span className="font-mono font-semibold tabular-nums text-landing-fg">
+                  {balance.amount}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-4 rounded-[var(--radius-md)] border border-landing-border/70 bg-landing-bg/60 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
+              Built from
+            </p>
+            <ul className="mt-2 space-y-1.5">
+              {RECALL_SOURCES.map((source) => (
+                <li
+                  key={source.label}
+                  className="flex items-center justify-between gap-3 text-[12px] text-landing-muted"
+                >
+                  <span>{source.label}</span>
+                  <span className="font-mono tabular-nums">{source.amount}</span>
+                </li>
+              ))}
+              <li className="flex items-center justify-between gap-3 text-[12px] text-landing-muted">
+                <span>Dinner · Rahul & Priya</span>
+                <span className="font-mono tabular-nums">₹620 you</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      <LandingDisclaimer className="mt-5">
-        Illustrative example — context-aware answers are part of the FLUX
-        product direction.
+      <LandingDisclaimer className="mt-5 border-t border-landing-accent/10 pt-5">
+        Here&apos;s what it feels like when context sticks — a question next
+        week still has a real answer.
       </LandingDisclaimer>
     </div>
   );
@@ -97,13 +246,9 @@ export function SectionMemory() {
       title="It remembers. So you don't have to."
       description="Most apps store an amount and a category. FLUX keeps who was there, how it splits, which thread it belongs to, and when it happened — so your questions make sense later."
     >
-      <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
-        <FlatRecordCard />
-        <ContextRecordCard />
-      </div>
-
-      <div className="mt-8 lg:mt-10">
-        <FollowUpExchange />
+      <div className="space-y-6 lg:space-y-8">
+        <MemoryLayersPanel />
+        <RecallResultPanel />
       </div>
     </LandingSection>
   );

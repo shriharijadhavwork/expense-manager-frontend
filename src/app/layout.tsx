@@ -20,7 +20,11 @@ const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: appConfig.appName,
     template: `%s · ${appConfig.appName}`,

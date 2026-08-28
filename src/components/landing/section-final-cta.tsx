@@ -5,7 +5,7 @@ export function SectionFinalCta() {
   return (
     <section
       id="get-started"
-      className="scroll-mt-16 border-b border-landing-border bg-landing-surface"
+      className="landing-reveal landing-reveal-body scroll-mt-16 border-b border-landing-border/80 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--landing-accent-soft)_22%,var(--landing-surface))_0%,var(--landing-surface)_55%,color-mix(in_oklab,var(--landing-warm)_10%,var(--landing-surface))_100%)]"
       aria-labelledby="final-cta-heading"
     >
       <div className="mx-auto max-w-6xl px-4 py-20 text-center sm:px-6 sm:py-24 lg:px-8 lg:py-28">
@@ -23,7 +23,11 @@ export function SectionFinalCta() {
             "mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row",
           )}
         >
-          <LandingPrimaryCta size="lg" className="w-full sm:w-auto" />
+          <LandingPrimaryCta
+            size="lg"
+            trailingArrow
+            className="w-full sm:w-auto"
+          />
         </div>
       </div>
     </section>

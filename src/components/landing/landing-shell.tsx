@@ -1,4 +1,5 @@
 import { cn } from "@/utils/cn";
+import { LandingSmoothScroll } from "@/components/landing/landing-smooth-scroll";
 
 type LandingShellProps = {
   children: React.ReactNode;
@@ -7,8 +8,10 @@ type LandingShellProps = {
 
 export function LandingShell({ children, className }: LandingShellProps) {
   return (
-    <div className={cn("landing flex min-h-dvh flex-col", className)}>
-      {children}
-    </div>
+    <LandingSmoothScroll>
+      <div className={cn("landing flex min-h-dvh flex-col", className)}>
+        {children}
+      </div>
+    </LandingSmoothScroll>
   );
 }

@@ -5,9 +5,10 @@ export function SectionAskFlux() {
   return (
     <LandingSection
       id="ask-flux"
+      tone="surface"
       eyebrow="Questions"
       title="Your finances, finally conversational."
-      description="No filters to configure. No spreadsheet formulas. Ask what you actually want to know."
+      description="No filters to configure. No spreadsheet formulas. Ask what you actually want to know — totals, splits, trends, or whether a plan fits."
     >
       <AskFluxInteractive />
     </LandingSection>

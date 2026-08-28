@@ -52,13 +52,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let active = true;
 
     async function bootstrap() {
-      try {
-        const stored = getStoredToken();
-        if (!stored) {
-          return;
+      const stored = getStoredToken();
+      if (!stored) {
+        if (active) {
+          setIsLoading(false);
         }
+        return;
+      }
 
-        const me = await authApi.me(stored);
+      try {
+        const me = await Promise.race([
+          authApi.me(stored),
+          new Promise<never>((_, reject) => {
+            window.setTimeout(() => reject(new Error("AUTH_BOOTSTRAP_TIMEOUT")), 5000);
+          }),
+        ]);
         if (!active) return;
         setToken(stored);
         setUser(me);

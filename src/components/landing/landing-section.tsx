@@ -28,13 +28,14 @@ export function LandingSection({
       className={cn(
         "border-b border-landing-border",
         id && "scroll-mt-16",
-        tone === "surface" && "bg-landing-surface",
+        tone === "surface" &&
+          "bg-[linear-gradient(180deg,color-mix(in_oklab,var(--landing-accent-soft)_18%,var(--landing-surface))_0%,var(--landing-surface)_100%)]",
         className,
       )}
       aria-labelledby={id ? `${id}-heading` : undefined}
     >
       <div className={cn("mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24", contentClassName)}>
-        <div className="max-w-2xl">
+        <div className="landing-reveal landing-reveal-header max-w-2xl">
           {eyebrow ? (
             <p className="text-sm font-medium tracking-wide text-landing-muted">
               {eyebrow}
@@ -56,7 +57,7 @@ export function LandingSection({
           ) : null}
         </div>
 
-        <div className="mt-12 lg:mt-14">{children}</div>
+        <div className="landing-reveal landing-reveal-body mt-12 lg:mt-14">{children}</div>
       </div>
     </section>
   );

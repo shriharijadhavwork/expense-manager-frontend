@@ -42,8 +42,8 @@ function TypingIndicator({
 }) {
   const bubbleClass = macOS
     ? side === "right"
-      ? "rounded-[1.25rem] rounded-br-[0.25rem] bg-landing-accent/90 px-3.5 py-3"
-      : "rounded-[1.25rem] rounded-bl-[0.25rem] bg-landing-accent-soft px-3.5 py-3"
+      ? "rounded-[1.25rem] rounded-br-[0.25rem] bg-landing-chat-user px-3.5 py-3"
+      : "rounded-[1.25rem] rounded-bl-[0.25rem] border border-landing-flux-bubble-border/30 bg-landing-flux-bubble px-3.5 py-3"
     : cn(
         "rounded-[1.125rem] border border-landing-border bg-landing-bg px-3.5 py-3",
         side === "right" && "rounded-br-[0.375rem]",
@@ -107,7 +107,7 @@ function UserMessage({
   if (macOS) {
     return (
       <div className="flex justify-end landing-enter">
-        <div className="max-w-[88%] rounded-[1.25rem] rounded-br-[0.25rem] bg-landing-accent px-3.5 py-2 text-[15px] leading-relaxed text-landing-accent-fg shadow-[0_1px_2px_rgba(0,0,0,0.12)]">
+        <div className="max-w-[88%] rounded-[1.25rem] rounded-br-[0.25rem] bg-landing-chat-user px-3.5 py-2 text-[15px] leading-relaxed text-white shadow-[0_1px_2px_rgba(0,0,0,0.12)]">
           {children}
         </div>
       </div>
@@ -140,7 +140,7 @@ function FluxBubble({
   if (macOS) {
     return (
       <div className="flex justify-start landing-enter">
-        <div className="max-w-[88%] rounded-[1.25rem] rounded-bl-[0.25rem] bg-landing-accent-soft px-3.5 py-3 text-landing-fg shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+        <div className="max-w-[88%] rounded-[1.25rem] rounded-bl-[0.25rem] border border-landing-flux-bubble-border/30 bg-landing-flux-bubble px-3.5 py-3 text-landing-fg shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
           {children}
         </div>
       </div>
@@ -178,19 +178,24 @@ function FluxStructuredMessage({
         className={cn(
           "mt-2.5 rounded-lg px-3 py-2",
           macOS
-            ? "border border-landing-accent/10 bg-white/70"
+            ? "border border-landing-flux-bubble-border/40 bg-landing-surface"
             : "border border-landing-border bg-landing-surface",
         )}
       >
         <p className="font-mono text-[15px] font-medium tabular-nums tracking-tight text-landing-fg">
           {reply.amount}
-          <span className="mx-1.5 font-sans font-normal text-landing-muted">
+          <span className="mx-1.5 font-sans font-normal text-landing-fg/60">
             ·
           </span>
           <span className="font-sans font-normal">{reply.category}</span>
         </p>
       </div>
-      <p className="mt-2.5 text-sm leading-snug text-landing-muted">
+      <p
+        className={cn(
+          "mt-2.5 text-sm leading-snug",
+          macOS ? "text-landing-fg/75" : "text-landing-muted",
+        )}
+      >
         {reply.context}
       </p>
     </FluxBubble>
@@ -212,7 +217,7 @@ function FluxTextMessage({
             key={index}
             className={cn(
               part.variant === "amount" && "font-mono font-semibold tabular-nums text-landing-accent",
-              part.variant === "muted" && "text-landing-muted",
+              part.variant === "muted" && (macOS ? "text-landing-fg/75" : "text-landing-muted"),
             )}
           >
             {part.text}
@@ -247,17 +252,31 @@ function FluxBreakdownMessage({
             className={cn(
               "flex items-baseline justify-between gap-3 text-sm",
               row.emphasis
-                ? "border-t border-landing-accent/15 pt-1.5 font-medium text-landing-fg"
-                : "text-landing-muted",
+                ? "border-t border-landing-flux-bubble-border/35 pt-1.5 font-medium text-landing-fg"
+                : macOS
+                  ? "text-landing-fg/80"
+                  : "text-landing-muted",
             )}
           >
             <dt>{row.label}</dt>
-            <dd className="shrink-0 font-mono tabular-nums">{row.value}</dd>
+            <dd
+              className={cn(
+                "shrink-0 font-mono tabular-nums",
+                !row.emphasis && macOS && "text-landing-fg",
+              )}
+            >
+              {row.value}
+            </dd>
           </div>
         ))}
       </dl>
       {reply.footer ? (
-        <p className="mt-2.5 text-sm leading-snug text-landing-muted">
+        <p
+          className={cn(
+            "mt-2.5 text-sm leading-snug",
+            macOS ? "text-landing-fg/75" : "text-landing-muted",
+          )}
+        >
           {reply.footer}
         </p>
       ) : null}
@@ -440,6 +459,7 @@ export function ConversationDemo({
 
       <div
         ref={scrollRef}
+        data-lenis-prevent
         className={cn(
           "hero-chat-messages min-h-0 flex-1 overflow-y-auto overscroll-contain",
           isMac && "hero-chat-messages--mac",

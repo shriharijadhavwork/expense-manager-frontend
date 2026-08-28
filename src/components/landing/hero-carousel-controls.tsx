@@ -22,9 +22,10 @@ export function HeroCarouselControls({
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-3 sm:gap-4",
+        "relative flex items-center justify-center gap-3 sm:gap-4",
         className,
       )}
+      data-lenis-prevent
       aria-label="Demo playback controls"
     >
       <div
@@ -46,10 +47,10 @@ export function HeroCarouselControls({
               title={label}
               onClick={() => onSelect(index)}
               className={cn(
-                "rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-accent focus-visible:ring-offset-2 focus-visible:ring-offset-landing-bg",
+                "touch-manipulation rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-accent focus-visible:ring-offset-2 focus-visible:ring-offset-landing-bg",
                 isActive
-                  ? "h-2 w-7 bg-landing-accent"
-                  : "h-2 w-2 bg-landing-border hover:bg-landing-muted",
+                  ? "h-2.5 w-8 bg-landing-accent sm:h-2 sm:w-7"
+                  : "h-3 w-3 bg-landing-border hover:bg-landing-muted sm:h-2 sm:w-2",
               )}
             />
           );
@@ -63,7 +64,7 @@ export function HeroCarouselControls({
         aria-pressed={paused}
         title={paused ? "Resume auto-advance" : "Pause auto-advance"}
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full border border-landing-border bg-landing-bg/80 text-landing-muted backdrop-blur-sm transition-colors",
+          "flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-landing-border bg-landing-bg/80 text-landing-muted backdrop-blur-sm transition-colors sm:h-8 sm:w-8",
           "hover:border-landing-accent/30 hover:text-landing-fg",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-accent focus-visible:ring-offset-2 focus-visible:ring-offset-landing-bg",
           paused && "border-landing-accent/30 text-landing-accent",

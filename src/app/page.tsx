@@ -7,10 +7,8 @@ import { SectionConversation } from "@/components/landing/section-conversation";
 import { SectionFinalCta } from "@/components/landing/section-final-cta";
 import { SectionInsights } from "@/components/landing/section-insights";
 import { SectionMemory } from "@/components/landing/section-memory";
-import { SectionMoneyFlow } from "@/components/landing/section-money-flow";
 import { SectionProblem } from "@/components/landing/section-problem";
 import { SectionTogether } from "@/components/landing/section-together";
-import { SectionTrust } from "@/components/landing/section-trust";
 import { LandingShell } from "@/components/landing/landing-shell";
 import { appConfig } from "@/config/env";
 
@@ -52,10 +50,8 @@ export default function HomePage() {
         <SectionConversation />
         <SectionTogether />
         <SectionMemory />
-        <SectionMoneyFlow />
         <SectionAskFlux />
         <SectionInsights />
-        <SectionTrust />
         <SectionFinalCta />
       </main>
 

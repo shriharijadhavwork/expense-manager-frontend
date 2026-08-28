@@ -10,7 +10,7 @@
 | **Tagline** | Go live. Spend. — We'll keep score. |
 | **Positioning** | AI-first personal finance — talk naturally about money instead of maintaining spreadsheets |
 
-The landing page sells the **product vision**. Several demos are explicitly labeled *illustrative* because the corresponding backend capabilities are not fully built yet (see [Capability matrix](#capability-matrix)).
+The landing page sells the **product vision**. Demos for unshipped capabilities use `LandingDisclaimer` with an optional **Coming soon** badge (see [Capability matrix](#capability-matrix)).
 
 ## Route
 
@@ -20,7 +20,7 @@ The landing page sells the **product vision**. Several demos are explicitly labe
 | `/register`, `/login` | Guest | Auth entry; CTAs from landing point here |
 | `/app/**` | Required | Signed-in product (dashboard, chat, expenses, …) |
 
-Previously `/` redirected to `/app`. It now renders the landing page for all visitors. Nav uses **Start with FLUX** / **Open app**; the hero primary CTA uses **Talk to FLUX**.
+Previously `/` redirected to `/app`. It now renders the landing page for all visitors. Primary CTA label is **Talk to FLUX** (guests → `/register`; signed-in → `/app`).
 
 ## Page structure
 
@@ -28,20 +28,18 @@ Sections render top-to-bottom in `src/app/page.tsx`:
 
 | # | Section component | `id` anchor | Notes |
 | --- | --- | --- | --- |
-| 1 | `LandingNav` | — | Sticky header, auth-aware CTAs |
-| 2 | `LandingHero` | `how-it-works` | Copy + macOS-style animated demo carousel |
-| 3 | `SectionProblem` | `the-problem` | Traditional vs FLUX flow comparison |
-| 4 | `SectionConversation` | `conversational-tracking` | Four static NL → record examples |
-| 5 | `SectionTogether` | `track-together` | Group / household / quarterly insight threads |
-| 6 | `SectionMemory` | `memory` | Flat vs contextual record + follow-up Q |
-| 7 | `SectionMoneyFlow` | `money-flow` | Typographic income → balance flow |
-| 8 | `SectionAskFlux` | `ask-flux` | Interactive question tabs + answers |
-| 9 | `SectionInsights` | `insights` | Example insight lines |
-| 10 | `SectionTrust` | `trust` | Factual security copy (matches backend) |
-| 11 | `SectionFinalCta` | `get-started` | Closing CTA |
-| 12 | `LandingFooter` | — | Links + tagline |
+| 1 | `LandingNav` | — | Sticky header; **See how it works** → `#the-problem` |
+| 2 | `LandingHero` | — | Copy + macOS-style animated demo carousel |
+| 3 | `SectionProblem` | `the-problem` | Traditional form vs FLUX chat + timeline |
+| 4 | `SectionConversation` | `conversational-tracking` | Three-step pipeline (mention → structure → move on) |
+| 5 | `SectionTogether` | `track-together` | Thread rail + bento (trip, household, quarterly radar) |
+| 6 | `SectionMemory` | `memory` | Memory layers + structured recall panel |
+| 7 | `SectionAskFlux` | `ask-flux` | Category filters + interactive answer cards |
+| 8 | `SectionInsights` | `insights` | Pattern layer bento with mini charts |
+| 9 | `SectionFinalCta` | `get-started` | Closing CTA |
+| 10 | `LandingFooter` | — | Links + copyright |
 
-Hero demo anchor: `#conversation-demo` (used by nav).
+Hero carousel element: `#conversation-demo` on `hero-product-preview.tsx` (deep-link only; nav does not use it).
 
 ## Hero demo
 
@@ -58,7 +56,7 @@ The hero product preview (`hero-product-preview.tsx`) is a **tilted macOS window
   - **Pause auto-advance:** conversation ends → replay same slide (chat keeps animating)
 - Message types: user bubble, `flux-structured`, `flux-breakdown`, `flux-text`
 - Animation engine: `conversation-demo-animation.ts` + staged reveals in `conversation-demo.tsx`
-- Dependencies: `swiper`, `react-parallax-tilt`
+- Dependencies: `swiper`, `react-parallax-tilt`, `lenis` (smooth scroll via `landing-smooth-scroll.tsx`)
 
 Hero copy order: headline → tagline → description → CTAs. Copy and preview columns share a fixed min-height for vertical alignment.
 
@@ -66,15 +64,19 @@ Hero copy order: headline → tagline → description → CTAs. Copy and preview
 
 ```text
 src/app/page.tsx
-src/app/globals.css              # --landing-* tokens, hero carousel + chat scroll CSS
+src/app/opengraph-image.tsx       # Generated OG/Twitter card image
+src/app/globals.css               # --landing-* tokens, scroll reveals, section panels
 src/components/landing/
   landing-shell.tsx
+  landing-smooth-scroll.tsx
   landing-nav.tsx
   landing-footer.tsx
-  landing-cta.tsx                # Auth-aware CTA (hero overrides labels)
+  landing-cta.tsx
+  landing-secondary-cta.tsx
   landing-hero.tsx
   landing-section.tsx
-  hero-product-preview.tsx       # macOS frame + tilt
+  landing-disclaimer.tsx
+  hero-product-preview.tsx
   hero-conversation-carousel.tsx
   hero-carousel-controls.tsx
   conversation-demo.tsx
@@ -82,9 +84,15 @@ src/components/landing/
   conversation-scenarios.ts
   conversation-exchange.tsx
   flux-reply-card.tsx
+  spending-radar-chart.tsx
   ask-flux-interactive.tsx
-  section-*.tsx
-  landing-disclaimer.tsx
+  section-problem.tsx
+  section-conversation.tsx
+  section-together.tsx
+  section-memory.tsx
+  section-ask-flux.tsx
+  section-insights.tsx
+  section-final-cta.tsx
   landing-tagline.tsx
   landing-styles.ts
   use-prefers-reduced-motion.ts
@@ -92,7 +100,7 @@ src/components/landing/
 
 ## Design system (landing-scoped)
 
-Tokens live on `.landing` in `globals.css` so the signed-in app (`/app`) palette is unchanged.
+Tokens live on `.landing` in `globals.css`. The landing page **always uses the light palette** — it does not follow app/system dark mode (`/app` still respects theme).
 
 | Token | Role |
 | --- | --- |
@@ -105,18 +113,20 @@ Tokens live on `.landing` in `globals.css` so the signed-in app (`/app`) palette
 | `--landing-accent-soft` | FLUX reply bubbles |
 | `--landing-accent-fg` | Text on accent fills |
 | `--landing-warm` | Tagline em-dash highlight |
+| `--landing-friction` | Problem / traditional tracker accent |
 
-Typography: **Instrument Serif** (headlines), **Geist Sans** (body), **Geist Mono** (amounts).
+Typography: **Instrument Serif** (`font-display`, headlines), **Geist Sans** (body), **Geist Mono** (amounts).
+
+Scroll: Lenis smooth scroll with `prefers-reduced-motion` fallback; section reveals via CSS `animation-timeline: view()`.
 
 ## SEO
 
-Defined in `src/app/page.tsx` `metadata`:
+Defined in `src/app/page.tsx` `metadata` plus `src/app/opengraph-image.tsx`:
 
 - Title: `FLUX — Go live. Spend. We'll keep score.`
-- Meta description, Open Graph, Twitter card
+- Meta description, Open Graph, Twitter `summary_large_image`
 - `applicationName: "Flux"`
-
-OG image is not generated yet — add later (`@vercel/og` or static asset).
+- OG image: auto-generated 1200×630 PNG from `opengraph-image.tsx`
 
 ## Capability matrix
 
@@ -129,11 +139,9 @@ Use this when updating copy or demos. **Do not claim features as live unless the
 | Manual expense CRUD + category filters | **Live** — `/app/expenses`, dashboard aggregates |
 | Chat threads + messages + Socket.IO realtime | **Live** — no AI assistant replies yet |
 | Natural language → structured expense | **Not implemented** — demos are illustrative |
-| Income / transfers / balance flow | **Not implemented** — money-flow section is illustrative |
-| Conversational Q&A (“How much with Rahul?”) | **Not implemented** — ask-flux section is illustrative |
-| Group splits / shared balances | **Not implemented** — together + hero demos illustrative |
-| Quarterly summaries / email reports | **Not implemented** — hero + ask-flux illustrative |
-| Comparative / pattern insights | **Partial** — month/category totals on dashboard; comparative insights illustrative |
+| Conversational Q&A (“How much with Rahul?”) | **Not implemented** — ask-flux section (Coming soon) |
+| Group splits / shared balances | **Not implemented** — together section (Coming soon) |
+| Quarterly summaries / pattern insights | **Not implemented** — insights section (Coming soon) |
 | Settlements / balances | **Not implemented** — placeholder page |
 
 ## Development
@@ -149,14 +157,14 @@ No extra env vars for the landing page. Auth-aware CTAs use the existing `AuthPr
 ## Editing guidelines
 
 1. **Keep disclaimers** on any demo that exceeds current API capabilities (`LandingDisclaimer`).
-2. **Trust section** — only state what the backend actually does (see `section-trust.tsx` and backend README auth section).
-3. **No decorative icons** — avatars only where they aid chat comprehension; pause/play on carousel controls is allowed.
-4. **Prefer landing tokens** over app `--primary` inside `src/components/landing/`.
-5. **Server components by default** — client only for animation/interaction (hero carousel, `conversation-demo`, `ask-flux-interactive`, `landing-nav`, `landing-cta`).
-6. **Hero chat height** — use `HERO_CHAT_VIEWPORT_CLASS`; never `min-height` on the embedded demo (content scrolls inside).
+2. **No decorative icons** — avatars only where they aid chat comprehension; pause/play on carousel controls is allowed.
+3. **Prefer landing tokens** over app `--primary` inside `src/components/landing/`.
+4. **Server components by default** — client only for animation/interaction (hero carousel, `conversation-demo`, `ask-flux-interactive`, `landing-nav`, `landing-cta`, `landing-smooth-scroll`, `spending-radar-chart`).
+5. **Hero chat height** — use `HERO_CHAT_VIEWPORT_CLASS`; never `min-height` on the embedded demo (content scrolls inside).
+6. **Section variety** — avoid duplicating the same UI pattern across sections (comparison cards only in Problem; animated chat only in Hero).
 
 ## Related docs
 
-- Backend integration & trust claims: `../expense-manager-backend/docs/frontend-integration.md`
+- Backend integration: `../expense-manager-backend/docs/frontend-integration.md`
 - Auth flows: `docs/email-and-auth-plan.md`
 - Product plan: `docs/plan.md`

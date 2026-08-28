@@ -6,6 +6,8 @@ import Tilt from "react-parallax-tilt";
 import { HeroCarouselControls } from "@/components/landing/hero-carousel-controls";
 import { HeroConversationCarousel } from "@/components/landing/hero-conversation-carousel";
 import { HERO_CHAT_VIEWPORT_CLASS } from "@/components/landing/landing-styles";
+import { useCoarsePointer } from "@/components/landing/use-coarse-pointer";
+import { useMounted } from "@/components/landing/use-mounted";
 import { usePrefersReducedMotion } from "@/components/landing/use-prefers-reduced-motion";
 import { cn } from "@/utils/cn";
 
@@ -24,13 +26,24 @@ function MacTrafficLights() {
 }
 
 export function HeroProductPreview({ className }: HeroProductPreviewProps) {
+  const mounted = useMounted();
   const reducedMotion = usePrefersReducedMotion();
+  const coarsePointer = useCoarsePointer();
   const swiperRef = useRef<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
+  const useTilt = mounted && !reducedMotion && !coarsePointer;
+
   const goToSlide = useCallback((index: number) => {
-    swiperRef.current?.slideToLoop(index);
+    setActiveIndex(index);
+
+    const swiper = swiperRef.current;
+    if (!swiper) {
+      return;
+    }
+
+    swiper.slideToLoop(index);
   }, []);
 
   const frame = (
@@ -50,6 +63,7 @@ export function HeroProductPreview({ className }: HeroProductPreviewProps) {
       <div className={cn("w-full overflow-hidden bg-[#f5f5f7]", HERO_CHAT_VIEWPORT_CLASS)}>
         <HeroConversationCarousel
           className="h-full"
+          activeIndex={activeIndex}
           pauseAutoAdvance={paused}
           onActiveIndexChange={setActiveIndex}
           onSwiperReady={(swiper) => {
@@ -71,14 +85,7 @@ export function HeroProductPreview({ className }: HeroProductPreviewProps) {
         aria-hidden
       />
 
-      {reducedMotion ? (
-        <div
-          className="[transform:perspective(1200px)_rotateX(4deg)_rotateY(8deg)]"
-          style={{ transformStyle: "preserve-3d" }}
-        >
-          {frame}
-        </div>
-      ) : (
+      {useTilt ? (
         <Tilt
           tiltEnable
           tiltMaxAngleX={7}
@@ -97,10 +104,20 @@ export function HeroProductPreview({ className }: HeroProductPreviewProps) {
         >
           {frame}
         </Tilt>
+      ) : (
+        <div
+          className={cn(
+            !coarsePointer &&
+              "[transform:perspective(1200px)_rotateX(4deg)_rotateY(8deg)]",
+          )}
+          style={coarsePointer ? undefined : { transformStyle: "preserve-3d" }}
+        >
+          {frame}
+        </div>
       )}
 
       <HeroCarouselControls
-        className="mt-3.5 sm:mt-4"
+        className="relative z-20 mt-3.5 sm:mt-4"
         activeIndex={activeIndex}
         paused={paused}
         onSelect={goToSlide}

@@ -1,16 +1,20 @@
+"use client";
+
 import Link from "next/link";
 import { appConfig } from "@/config/env";
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { landingLinkClassName } from "@/components/landing/landing-styles";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/lib/auth/auth-provider";
 
 export function LandingFooter() {
   const year = new Date().getFullYear();
+  const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <footer className="border-t border-landing-border bg-landing-bg">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-sm">
             <BrandLockup
               showTagline
@@ -18,29 +22,20 @@ export function LandingFooter() {
             />
           </div>
 
-          <nav
-            className="flex flex-col gap-3 text-sm sm:items-end"
-            aria-label="Footer"
-          >
-            <Link href="/register" className={landingLinkClassName}>
-              Create account
+          {!isLoading ? (
+            <Link
+              href={isAuthenticated ? "/app" : "/register"}
+              className={landingLinkClassName}
+            >
+              {isAuthenticated ? "Open app" : "Sign up"}
             </Link>
-            <Link href="/login" className={landingLinkClassName}>
-              Sign in
-            </Link>
-            <Link href="/app" className={landingLinkClassName}>
-              Open app
-            </Link>
-            <Link href="#trust" className={landingLinkClassName}>
-              Privacy &amp; security
-            </Link>
-          </nav>
+          ) : null}
         </div>
 
         <Separator className="my-8 bg-landing-border" />
 
         <p className="text-xs text-landing-muted">
-          © {year} {appConfig.appName}. Your money is yours.
+          © {year} {appConfig.appName}.
         </p>
       </div>
     </footer>
