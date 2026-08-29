@@ -21,9 +21,13 @@ export const landingSecondaryButtonSmClassName =
 
 export const landingSecondaryButtonLgClassName = "h-11 px-5";
 
-/** Nav text action (Sign in) — subtle hover, no app ghost/muted tokens */
+/** Quiet header links — How it works, Sign in */
 export const landingNavLinkClassName =
-  "inline-flex h-9 items-center rounded-[var(--radius-md)] px-3 text-sm font-medium text-landing-muted transition-colors hover:bg-landing-accent-soft/50 hover:text-landing-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-accent focus-visible:ring-offset-2 focus-visible:ring-offset-landing-bg";
+  "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-sm px-1.5 text-[13px] font-medium text-landing-muted transition-colors hover:text-landing-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-accent focus-visible:ring-offset-2 focus-visible:ring-offset-landing-bg sm:px-2 sm:text-sm";
+
+/** Mobile primary action — text, not a filled button */
+export const landingNavPrimaryLinkClassName =
+  "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-sm px-1.5 text-[13px] font-semibold text-landing-accent transition-colors hover:text-landing-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-accent focus-visible:ring-offset-2 focus-visible:ring-offset-landing-bg sm:px-2 sm:text-sm";
 
 /** Fixed hero chat viewport height — do not use min-height (grows with content). */
 export const HERO_CHAT_VIEWPORT_CLASS =
