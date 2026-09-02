@@ -568,7 +568,13 @@ export function ChatWorkspace({
         return;
       }
 
-      if (user && event.message.userId === user.id) {
+      // Skip own user messages — already shown optimistically on send.
+      // Assistant replies share the same userId in personal threads.
+      if (
+        user &&
+        event.message.role === "user" &&
+        event.message.userId === user.id
+      ) {
         return;
       }
 

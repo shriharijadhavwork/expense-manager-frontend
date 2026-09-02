@@ -137,9 +137,9 @@ Use this when updating copy or demos. **Do not claim features as live unless the
 | Account-scoped expenses, threads, messages | **Live** — JWT auth, per-user data |
 | bcrypt passwords, email verification | **Live** — see `expense-manager-backend/README.md` |
 | Manual expense CRUD + category filters | **Live** — `/app/expenses`, dashboard aggregates |
-| Chat threads + messages + Socket.IO realtime | **Live** — no AI assistant replies yet |
-| Natural language → structured expense | **Not implemented** — demos are illustrative |
-| Conversational Q&A (“How much with Rahul?”) | **Not implemented** — ask-flux section (Coming soon) |
+| Chat threads + messages + Socket.IO realtime + FLUX assistant replies | **Live** — assistant arrives via `message.created` after debounced AI turn |
+| Natural language → structured expense (chat) | **Live** — backend AI extracts and creates expenses; landing demos remain illustrative |
+| Conversational Q&A (“How much with Rahul?”) | **Partially live** — `query_expenses` intent in chat; landing ask-flux section still “Coming soon” |
 | Group splits / shared balances | **Not implemented** — together section (Coming soon) |
 | Quarterly summaries / pattern insights | **Not implemented** — insights section (Coming soon) |
 | Settlements / balances | **Not implemented** — placeholder page |

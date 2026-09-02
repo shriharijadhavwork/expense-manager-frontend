@@ -2,7 +2,9 @@
 
 Next.js web client for the expense-manager backend. The product is branded **FLUX** (*Go live. Spend. — We'll keep score.*).
 
-Public visitors land on a marketing page at `/`. Signed-in users use `/app` for expenses, chat, and settings. The frontend is a REST (+ Socket.IO) client only — no direct MongoDB, Gemini, or LangGraph access. See `docs/plan.md`.
+Public visitors land on a marketing page at `/`. Signed-in users use `/app` for expenses, chat, and settings. The frontend is a REST (+ Socket.IO) client only — no direct MongoDB, Gemini, or LangGraph access.
+
+**Chat + AI:** user messages via REST; FLUX assistant replies arrive asynchronously via Socket.IO. See [`docs/chat.md`](docs/chat.md).
 
 ## Stack
 
@@ -70,9 +72,9 @@ Backend alignment for trust copy and feature claims: `../expense-manager-backend
 
 ```text
 Browser
-  ↓ REST + Socket.IO
+  ↓ REST (send) + Socket.IO (receive: others, system, FLUX assistant)
 Node.js API (expense-manager-backend)
-  ↓
+  ↓ LangGraph + Gemini (server-side only)
 MongoDB / Cloudinary
 ```
 
@@ -82,8 +84,11 @@ API calls go through `src/lib/api/` — avoid raw `fetch` in page components.
 
 | Doc | Purpose |
 | --- | --- |
+| `docs/chat.md` | Chat UI, optimistic send, realtime assistant delivery, AI reply flow |
 | `docs/landing-page.md` | FLUX marketing page |
-| `docs/plan.md` | Frontend implementation plan |
+| `docs/plan.md` | Frontend implementation plan (partially stale — see `chat.md` for chat) |
 | `docs/email-and-auth-plan.md` | Auth UI + email flows |
 | `docs/groups-and-threads-plan.md` | Group chat |
-| `docs/realtime-socketio-plan.md` | Live messages |
+| `docs/realtime-socketio-plan.md` | Socket.IO client + chat integration |
+
+Backend AI reference: `../expense-manager-backend/docs/ai-implementation.md`
