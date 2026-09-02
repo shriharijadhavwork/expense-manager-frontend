@@ -6,6 +6,8 @@ Public visitors land on a marketing page at `/`. Signed-in users use `/app` for 
 
 **Chat + AI:** user messages via REST; FLUX assistant replies arrive asynchronously via Socket.IO. See [`docs/chat.md`](docs/chat.md).
 
+**Brand colors:** verdigris green palette shared across landing and app — [`docs/design-system.md`](docs/design-system.md).
+
 ## Stack
 
 - Next.js 16 (App Router)
@@ -52,7 +54,7 @@ npm test
 | `/forgot-password`, `/reset-password`, `/verify-email` | Guest / partial | Email flows |
 | `/invites/[token]` | Public preview | Group invite |
 | `/app` | Required | Dashboard (live expense aggregates) |
-| `/app/expenses` | Required | Create / list / search / edit / delete |
+| `/app/expenses` | Required | CRUD + search; category dropdown (titles), sub-category, debit/credit |
 | `/app/chat` | Required | Threads + messages + Socket.IO realtime |
 | `/app/threads` | Required | Thread list |
 | `/app/settlements` | Required | Placeholder (no settlement API yet) |
@@ -67,6 +69,17 @@ Implemented in `src/components/landing/`. Full documentation:
 Includes section map, design tokens, capability matrix (what is live vs illustrative), and editing guidelines.
 
 Backend alignment for trust copy and feature claims: `../expense-manager-backend/docs/frontend-integration.md`.
+
+## Expenses UI (Batch C)
+
+The expenses workspace (`src/components/expenses/`) loads the category tree from `GET /expenses/categories` and:
+
+- **Category** — dropdown shows `title` (e.g. Food & Dining); saves `slug` (`food_and_dining`) to the API
+- **Sub-category** — free-text input with per-category suggestions (not enforced)
+- **Type** — Expense (debit, red amount) or Income (credit, green amount)
+- **Display** — list and dashboard use `categoryLabel` + `subCategory`; slugs are never shown
+
+Helpers: `formatExpenseCategoryLine`, `expenseDirectionAmountClass` in `src/utils/format.ts`.
 
 ## Architecture
 
@@ -84,6 +97,7 @@ API calls go through `src/lib/api/` — avoid raw `fetch` in page components.
 
 | Doc | Purpose |
 | --- | --- |
+| `docs/design-system.md` | **FLUX color palette** — `--flux-*` tokens, app + landing |
 | `docs/chat.md` | Chat UI, optimistic send, realtime assistant delivery, AI reply flow |
 | `docs/landing-page.md` | FLUX marketing page |
 | `docs/plan.md` | Frontend implementation plan (partially stale — see `chat.md` for chat) |

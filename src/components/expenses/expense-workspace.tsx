@@ -11,29 +11,30 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/shared/toast";
+import { ExpenseCategoryFields } from "@/components/expenses/expense-category-fields";
+import { ExpenseDirectionSelect } from "@/components/expenses/expense-direction-select";
 import { expensesApi } from "@/lib/api/expenses";
 import { ApiError } from "@/lib/api/client";
 import { SUPPORTED_CURRENCIES } from "@/lib/currency/currency";
 import { useCurrency } from "@/lib/currency/currency-provider";
-import type { Expense } from "@/types/api";
+import type { Expense, ExpenseCategoryOption, ExpenseDirection } from "@/types/api";
 import type { CurrencyCode } from "@/lib/currency/currency";
-import { capitalize, displayExpenseAmount, formatShortDate, todayDateOnly } from "@/utils/format";
+import {
+  displayExpenseAmount,
+  expenseDirectionAmountClass,
+  expenseDirectionLabel,
+  formatExpenseCategoryLine,
+  formatShortDate,
+  todayDateOnly,
+} from "@/utils/format";
 import { cn } from "@/utils/cn";
-
-const CATEGORY_SUGGESTIONS = [
-  "food",
-  "travel",
-  "shopping",
-  "transport",
-  "bills",
-  "health",
-  "entertainment",
-];
 
 type ExpenseFormState = {
   amount: string;
   currency: CurrencyCode;
+  direction: ExpenseDirection;
   category: string;
+  subCategory: string;
   note: string;
   date: string;
 };
@@ -41,7 +42,9 @@ type ExpenseFormState = {
 const createEmptyForm = (currency: CurrencyCode): ExpenseFormState => ({
   amount: "",
   currency,
+  direction: "debit",
   category: "",
+  subCategory: "",
   note: "",
   date: todayDateOnly(),
 });
@@ -65,12 +68,14 @@ export function ExpenseWorkspace({
 }: ExpenseWorkspaceProps) {
   const { toast } = useToast();
   const { currency: defaultCurrency } = useCurrency();
+  const [categories, setCategories] = useState<ExpenseCategoryOption[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading",
   );
   const [error, setError] = useState<string | null>(null);
-  const [category, setCategory] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterDirection, setFilterDirection] = useState<"" | ExpenseDirection>("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -82,15 +87,22 @@ export function ExpenseWorkspace({
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  useEffect(() => {
+    void expensesApi.listCategories().then(setCategories).catch(() => {
+      setCategories([]);
+    });
+  }, []);
+
   const load = useCallback(async () => {
     setStatus("loading");
     setError(null);
 
     try {
-      const hasFilters = Boolean(category.trim() || from || to);
+      const hasFilters = Boolean(filterCategory || filterDirection || from || to);
       const data = hasFilters
         ? await expensesApi.search({
-            ...(category.trim() ? { category: category.trim() } : {}),
+            ...(filterCategory ? { category: filterCategory } : {}),
+            ...(filterDirection ? { direction: filterDirection } : {}),
             ...(from ? { from } : {}),
             ...(to ? { to } : {}),
           })
@@ -107,7 +119,7 @@ export function ExpenseWorkspace({
       setError(message);
       setStatus("error");
     }
-  }, [category, from, to, onLoaded]);
+  }, [filterCategory, filterDirection, from, to, onLoaded]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -133,7 +145,9 @@ export function ExpenseWorkspace({
     setForm({
       amount: String(expense.amount),
       currency: expense.currency as CurrencyCode,
+      direction: expense.direction,
       category: expense.category,
+      subCategory: expense.subCategory,
       note: expense.note,
       date: expense.date,
     });
@@ -161,23 +175,21 @@ export function ExpenseWorkspace({
 
     setSaving(true);
     try {
+      const payload = {
+        amount,
+        currency: form.currency,
+        direction: form.direction,
+        category: form.category,
+        subCategory: form.subCategory.trim(),
+        note: form.note.trim(),
+        date: form.date,
+      };
+
       if (editing) {
-        await expensesApi.update(editing.id, {
-          amount,
-          currency: form.currency,
-          category: form.category.trim(),
-          note: form.note.trim(),
-          date: form.date,
-        });
+        await expensesApi.update(editing.id, payload);
         toast({ title: "Expense updated", variant: "success" });
       } else {
-        await expensesApi.create({
-          amount,
-          currency: form.currency,
-          category: form.category.trim(),
-          note: form.note.trim(),
-          date: form.date,
-        });
+        await expensesApi.create(payload);
         toast({ title: "Expense added", variant: "success" });
       }
       setDialogOpen(false);
@@ -227,14 +239,48 @@ export function ExpenseWorkspace({
       ) : null}
 
       {showFilters && mode === "full" ? (
-        <Card className="grid gap-3 sm:grid-cols-4">
-          <Input
-            label="Category"
-            list="expense-categories"
-            placeholder="food"
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-          />
+        <Card className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="space-y-1.5">
+            <label
+              htmlFor="filter-category"
+              className="block text-sm font-medium text-foreground"
+            >
+              Category
+            </label>
+            <select
+              id="filter-category"
+              value={filterCategory}
+              onChange={(event) => setFilterCategory(event.target.value)}
+              className="h-10 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">All categories</option>
+              {categories.map((category) => (
+                <option key={category.slug} value={category.slug}>
+                  {category.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label
+              htmlFor="filter-direction"
+              className="block text-sm font-medium text-foreground"
+            >
+              Type
+            </label>
+            <select
+              id="filter-direction"
+              value={filterDirection}
+              onChange={(event) =>
+                setFilterDirection(event.target.value as "" | ExpenseDirection)
+              }
+              className="h-10 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">All types</option>
+              <option value="debit">Expense</option>
+              <option value="credit">Income</option>
+            </select>
+          </div>
           <Input
             label="From"
             type="date"
@@ -254,7 +300,8 @@ export function ExpenseWorkspace({
             <Button
               variant="ghost"
               onClick={() => {
-                setCategory("");
+                setFilterCategory("");
+                setFilterDirection("");
                 setFrom("");
                 setTo("");
               }}
@@ -262,11 +309,6 @@ export function ExpenseWorkspace({
               Clear
             </Button>
           </div>
-          <datalist id="expense-categories">
-            {CATEGORY_SUGGESTIONS.map((item) => (
-              <option key={item} value={item} />
-            ))}
-          </datalist>
         </Card>
       ) : null}
 
@@ -302,10 +344,22 @@ export function ExpenseWorkspace({
               <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-mono text-lg font-semibold tracking-tight text-expense">
+                    <p
+                      className={cn(
+                        "font-mono text-lg font-semibold tracking-tight",
+                        expenseDirectionAmountClass(expense.direction),
+                      )}
+                    >
                       {displayExpenseAmount(expense)}
                     </p>
-                    <Badge tone="primary">{capitalize(expense.category)}</Badge>
+                    <Badge tone="primary">
+                      {formatExpenseCategoryLine(expense)}
+                    </Badge>
+                    <Badge
+                      tone={expense.direction === "credit" ? "success" : "neutral"}
+                    >
+                      {expenseDirectionLabel(expense.direction)}
+                    </Badge>
                     <Badge>{expense.currency}</Badge>
                     {expense.groupId ? (
                       <Badge tone="success">Group</Badge>
@@ -389,24 +443,26 @@ export function ExpenseWorkspace({
               </select>
             </div>
           </div>
-          <Input
-            label="Category"
-            name="category"
-            list="expense-form-categories"
-            required
-            value={form.category}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                category: event.target.value,
-              }))
+
+          <ExpenseDirectionSelect
+            value={form.direction}
+            onChange={(direction) =>
+              setForm((current) => ({ ...current, direction }))
             }
           />
-          <datalist id="expense-form-categories">
-            {CATEGORY_SUGGESTIONS.map((item) => (
-              <option key={item} value={item} />
-            ))}
-          </datalist>
+
+          <ExpenseCategoryFields
+            categories={categories}
+            categorySlug={form.category}
+            subCategory={form.subCategory}
+            onCategoryChange={(category) =>
+              setForm((current) => ({ ...current, category }))
+            }
+            onSubCategoryChange={(subCategory) =>
+              setForm((current) => ({ ...current, subCategory }))
+            }
+          />
+
           <Input
             label="Date"
             name="date"

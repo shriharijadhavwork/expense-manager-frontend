@@ -17,6 +17,14 @@ export type AuthResult = {
   token: string;
 };
 
+export type ExpenseDirection = "debit" | "credit";
+
+export type ExpenseCategoryOption = {
+  slug: string;
+  title: string;
+  subCategorySuggestions: string[];
+};
+
 export type Expense = {
   id: string;
   userId: string;
@@ -25,7 +33,11 @@ export type Expense = {
   currency: string;
   /** Locale-grouped amount without symbol, e.g. "50,000". */
   formattedAmount: string;
+  direction: ExpenseDirection;
+  /** Canonical slug — use categoryLabel in the UI. */
   category: string;
+  categoryLabel: string;
+  subCategory: string;
   note: string;
   date: string;
   sourceThreadId?: string;
@@ -37,7 +49,9 @@ export type Expense = {
 export type CreateExpenseInput = {
   amount: number;
   currency: string;
+  direction?: ExpenseDirection;
   category: string;
+  subCategory?: string;
   note?: string;
   date: string;
 };
@@ -45,13 +59,17 @@ export type CreateExpenseInput = {
 export type UpdateExpenseInput = {
   amount?: number;
   currency?: string;
+  direction?: ExpenseDirection;
   category?: string;
+  subCategory?: string;
   note?: string;
   date?: string;
 };
 
 export type SearchExpensesInput = {
   category?: string;
+  subCategory?: string;
+  direction?: ExpenseDirection;
   from?: string;
   to?: string;
 };

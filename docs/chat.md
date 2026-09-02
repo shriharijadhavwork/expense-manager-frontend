@@ -28,6 +28,7 @@ Socket is **notify-only** — never used to send chat content.
 | --- | --- |
 | `src/components/chat/chat-workspace.tsx` | Thread UI, optimistic send, realtime subscribe, pagination |
 | `src/components/chat/message-bubble.tsx` | Role-based layout (user / assistant / system) |
+| `src/components/chat/assistant-markdown-content.tsx` | Read-only BlockNote renderer for assistant Markdown |
 | `src/components/chat/chat-composer.tsx` | Input, attachments, send |
 | `src/lib/realtime/client.ts` | Socket.IO singleton, join/leave, `message.created` handler |
 | `src/lib/auth/auth-provider.tsx` | Connects/disconnects realtime on login/logout |
@@ -105,6 +106,21 @@ Realtime subscription requires a persisted thread id (`isPersistedThreadId`).
 
 ---
 
+## Brand colors (chat bubbles)
+
+Chat uses the unified **FLUX verdigris** palette (`docs/design-system.md`). Semantic tokens in `globals.css`:
+
+| Element | Tokens / classes |
+| --- | --- |
+| Your messages | `bg-chat-user` → `--flux-chat-user` (green, white text) |
+| FLUX replies | `bg-chat-assistant` → `--flux-bubble`; border `border-flux-bubble-border` |
+| FLUX avatar ring | `ring-flux-bubble-border/40` |
+| Links in attachments | `text-flux-accent` |
+
+Landing hero demos use the same hues via `--landing-chat-user` / `--landing-flux-bubble` aliases.
+
+---
+
 ## Pagination
 
 - Page size: `30` (`MESSAGE_PAGE_SIZE`), max `50` on API.
@@ -128,6 +144,7 @@ Realtime subscription requires a persisted thread id (`isPersistedThreadId`).
 | Auto-reply after user message (debounced) | **Live** when `GEMINI_API_KEY` set |
 | Multi-expense from one message | **Live** (Batch 7) |
 | Reply delivered via `message.created` | **Live** |
+| Rich assistant Markdown rendering | **Live** — BlockNote read-only viewer (`tryParseMarkdownToBlocks`) |
 | Typing / "FLUX is thinking…" indicator | **Not implemented** |
 | Expense cards from `message.expenseIds` | **Not implemented** (ids stored; UI shows text only) |
 | Structured clarification UI | **Not implemented** (plain text bubbles) |

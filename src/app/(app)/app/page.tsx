@@ -14,10 +14,12 @@ import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { useCurrency } from "@/lib/currency/currency-provider";
 import type { Expense } from "@/types/api";
+import { cn } from "@/utils/cn";
 import {
-  capitalize,
   displayExpenseAmount,
+  expenseDirectionAmountClass,
   formatCurrencyTotals,
+  formatExpenseCategoryLine,
   formatMoney,
   formatShortDate,
   startOfMonthDateOnly,
@@ -71,16 +73,17 @@ export default function DashboardPage() {
       (expense) => expense.currency === preferredCurrency,
     );
 
-    const byCategory = new Map<string, number>();
+    const byCategory = new Map<string, { label: string; amount: number }>();
     for (const expense of monthPreferred) {
-      byCategory.set(
-        expense.category,
-        (byCategory.get(expense.category) ?? 0) + expense.amount,
-      );
+      const existing = byCategory.get(expense.category);
+      byCategory.set(expense.category, {
+        label: expense.categoryLabel,
+        amount: (existing?.amount ?? 0) + expense.amount,
+      });
     }
 
     const topCategories = [...byCategory.entries()]
-      .sort((a, b) => b[1] - a[1])
+      .sort((a, b) => b[1].amount - a[1].amount)
       .slice(0, 4);
 
     const recent = [...expenses]
@@ -172,13 +175,13 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground">Top category</p>
               <p className="mt-3 text-2xl font-semibold tracking-tight">
                 {metrics.topCategories[0]
-                  ? capitalize(metrics.topCategories[0][0])
+                  ? metrics.topCategories[0][1].label
                   : "—"}
               </p>
               <p className="mt-2 text-xs text-muted-foreground">
                 {metrics.topCategories[0]
                   ? formatMoney(
-                      metrics.topCategories[0][1],
+                      metrics.topCategories[0][1].amount,
                       preferredCurrency,
                     )
                   : `No ${preferredCurrency} spend this month`}
@@ -220,14 +223,19 @@ export default function DashboardPage() {
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">
-                          {expense.note || capitalize(expense.category)}
+                          {expense.note || formatExpenseCategoryLine(expense)}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {formatShortDate(expense.date)} ·{" "}
-                          {capitalize(expense.category)}
+                          {formatExpenseCategoryLine(expense)}
                         </p>
                       </div>
-                      <p className="shrink-0 font-mono text-sm font-semibold text-expense">
+                      <p
+                        className={cn(
+                          "shrink-0 font-mono text-sm font-semibold",
+                          expenseDirectionAmountClass(expense.direction),
+                        )}
+                      >
                         {displayExpenseAmount(expense)}
                       </p>
                     </li>
@@ -247,14 +255,14 @@ export default function DashboardPage() {
                     No categorized spend yet this month.
                   </p>
                 ) : (
-                  metrics.topCategories.map(([name, amount]) => (
+                  metrics.topCategories.map(([slug, row]) => (
                     <div
-                      key={name}
+                      key={slug}
                       className="flex items-center justify-between gap-3"
                     >
-                      <Badge tone="primary">{capitalize(name)}</Badge>
+                      <Badge tone="primary">{row.label}</Badge>
                       <p className="font-mono text-sm font-medium">
-                        {formatMoney(amount, preferredCurrency)}
+                        {formatMoney(row.amount, preferredCurrency)}
                       </p>
                     </div>
                   ))

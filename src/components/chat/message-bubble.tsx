@@ -1,11 +1,28 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 import { AttachmentCard } from "@/components/chat/attachment-card";
 import { EntityAvatar, type EntityAvatarProps } from "@/components/ui/entity-avatar";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { DisplayMessage } from "@/components/chat/types";
 import { cn } from "@/utils/cn";
+
+const AssistantMarkdownContent = dynamic(
+  () =>
+    import("@/components/chat/assistant-markdown-content").then(
+      (mod) => mod.AssistantMarkdownContent,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <span
+        className="inline-block h-4 min-w-[6rem] animate-pulse rounded bg-muted/50"
+        aria-hidden
+      />
+    ),
+  },
+);
 
 type MessageBubbleProps = {
   message: DisplayMessage;
@@ -177,16 +194,15 @@ export function MessageBubble({
   );
 
   const bubbleClassName = cn(
-    "px-3.5 py-2 text-[0.9375rem] leading-relaxed shadow-sm",
     bubbleRadius,
     isUser &&
       isOwnMessage &&
-      "bg-chat-user text-chat-user-foreground",
+      "w-fit max-w-full px-3 py-1.5 text-[0.9375rem] leading-snug border border-chat-user-border/70 bg-chat-user text-chat-user-foreground",
     isUser &&
       !isOwnMessage &&
-      "border border-chat-peer-border bg-chat-peer text-chat-peer-foreground",
+      "w-fit max-w-full px-3 py-1.5 text-[0.9375rem] leading-snug border border-chat-peer-border bg-chat-peer text-chat-peer-foreground",
     isAssistant &&
-      "border border-info/30 bg-chat-assistant text-chat-assistant-foreground ring-1 ring-info/15",
+      "px-3.5 py-2 text-[0.9375rem] leading-relaxed shadow-sm border border-flux-bubble-border/40 bg-chat-assistant text-chat-assistant-foreground ring-1 ring-flux-bubble-border/20",
   );
 
   const messageBody = (
@@ -208,16 +224,19 @@ export function MessageBubble({
 
       {message.content ? (
         <div className={bubbleClassName}>
-          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          {isAssistant ? (
+            <AssistantMarkdownContent markdown={message.content} />
+          ) : (
+            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          )}
           {timeLabel ? (
             <time
               dateTime={message.createdAt}
               className={cn(
-                "mt-1 block text-[10px] leading-none tabular-nums",
-                isUser && isOwnMessage && "text-chat-user-foreground/70",
+                "mt-0.5 block text-right text-[10px] leading-none tabular-nums",
+                isUser && isOwnMessage && "text-muted-foreground/80",
                 isUser && !isOwnMessage && "text-chat-peer-foreground/75",
-                isAssistant && "text-muted-foreground",
-                align === "right" ? "text-right" : "text-left",
+                isAssistant && "mt-1 text-muted-foreground",
               )}
             >
               {timeLabel}
@@ -259,9 +278,9 @@ export function MessageBubble({
     >
       <div
         className={cn(
-          "flex max-w-[min(85%,680px)] items-end gap-1.5",
-          align === "right" && "flex-row-reverse",
-          align === "left" && "flex-row",
+          "flex items-end gap-1.5",
+          align === "right" && "max-w-[min(78%,520px)] flex-row-reverse",
+          align === "left" && "max-w-[min(85%,680px)] flex-row",
         )}
       >
         {isAssistant ? (

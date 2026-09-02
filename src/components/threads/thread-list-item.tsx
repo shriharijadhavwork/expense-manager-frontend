@@ -105,7 +105,7 @@ export function ThreadListItem({
         {unread ? (
           <span
             aria-label="Unread"
-            className="pointer-events-none absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-info"
+            className="pointer-events-none absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-flux-accent"
           />
         ) : null}
 

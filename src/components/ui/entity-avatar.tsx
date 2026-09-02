@@ -23,11 +23,11 @@ const sizeClasses: Record<EntityAvatarSize, string> = {
 
 const variantClasses: Record<EntityAvatarVariant, string> = {
   "user-own":
-    "bg-chat-user text-chat-user-foreground ring-chat-user/40",
+    "bg-flux-accent text-flux-accent-fg ring-flux-accent/30",
   "user-peer":
     "bg-chat-peer text-chat-peer-foreground ring-chat-peer-border",
   assistant:
-    "bg-chat-assistant text-chat-assistant-foreground ring-info/25",
+    "bg-chat-assistant text-chat-assistant-foreground ring-flux-bubble-border/40",
   neutral: "bg-foreground/10 text-foreground/80 ring-border/60",
 };
 

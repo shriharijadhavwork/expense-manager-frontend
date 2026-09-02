@@ -2,6 +2,7 @@ import { apiRequest } from "@/lib/api/client";
 import type {
   CreateExpenseInput,
   Expense,
+  ExpenseCategoryOption,
   SearchExpensesInput,
   UpdateExpenseInput,
 } from "@/types/api";
@@ -9,6 +10,10 @@ import type {
 export const expensesApi = {
   list(): Promise<Expense[]> {
     return apiRequest<Expense[]>("/expenses");
+  },
+
+  listCategories(): Promise<ExpenseCategoryOption[]> {
+    return apiRequest<ExpenseCategoryOption[]>("/expenses/categories");
   },
 
   search(input: SearchExpensesInput): Promise<Expense[]> {

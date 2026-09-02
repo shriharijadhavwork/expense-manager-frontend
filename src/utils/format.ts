@@ -1,5 +1,6 @@
 import { getDisplayCurrency, normalizeCurrency } from "@/lib/currency/currency";
 import { getDisplayTimezone } from "@/lib/timezone/timezone";
+import type { Expense, ExpenseDirection } from "@/types/api";
 
 const CURRENCY_LOCALE: Record<string, string> = {
   INR: "en-IN",
@@ -126,6 +127,38 @@ export function displayExpenseAmount(expense: {
     expense.formattedAmount ?? formatGroupedAmount(expense.amount, currency);
 
   return withCurrencySymbol(grouped, currency);
+}
+
+/** Red for money out, green for money in. */
+export function expenseDirectionAmountClass(
+  direction: ExpenseDirection = "debit",
+): string {
+  return direction === "credit" ? "text-income" : "text-expense";
+}
+
+export function expenseDirectionLabel(direction: ExpenseDirection): string {
+  return direction === "credit" ? "Income" : "Expense";
+}
+
+/** Human-readable category line — never shows the slug. */
+export function formatExpenseCategoryLine(expense: {
+  categoryLabel?: string;
+  category: string;
+  subCategory?: string;
+}): string {
+  const title = expense.categoryLabel?.trim() || expense.category;
+  const detail = expense.subCategory?.trim();
+
+  if (!detail) {
+    return title;
+  }
+
+  return `${title} · ${detail}`;
+}
+
+export function formatExpenseListMeta(expense: Expense): string {
+  const categoryLine = formatExpenseCategoryLine(expense);
+  return `${formatShortDate(expense.date)} · ${categoryLine}`;
 }
 
 function getTimeZone(timeZone?: string): string {

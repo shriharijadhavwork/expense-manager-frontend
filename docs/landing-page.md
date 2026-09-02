@@ -100,20 +100,24 @@ src/components/landing/
 
 ## Design system (landing-scoped)
 
-Tokens live on `.landing` in `globals.css`. The landing page **always uses the light palette** — it does not follow app/system dark mode (`/app` still respects theme).
+**Canonical palette:** [`design-system.md`](design-system.md) — shared `--flux-*` tokens power both landing and app.
 
-| Token | Role |
-| --- | --- |
-| `--landing-bg` | Warm paper background |
-| `--landing-fg` | Ink text |
-| `--landing-muted` | Secondary copy |
-| `--landing-border` | Hairline borders |
-| `--landing-surface` | Elevated panels |
-| `--landing-accent` | Verdigris — CTAs, user chat bubbles |
-| `--landing-accent-soft` | FLUX reply bubbles |
-| `--landing-accent-fg` | Text on accent fills |
-| `--landing-warm` | Tagline em-dash highlight |
-| `--landing-friction` | Problem / traditional tracker accent |
+Tokens live on `.landing` in `globals.css`. The landing page **always uses the light palette** — it does not follow app/system dark mode (`/app` still respects theme). Inside `.landing`, `--landing-*` names are **aliases** to `--flux-*` (same verdigris values as the app).
+
+| Token | Role | FLUX source |
+| --- | --- | --- |
+| `--landing-bg` | Warm paper background | `--flux-bg` |
+| `--landing-fg` | Ink text | `--flux-fg` |
+| `--landing-muted` | Secondary copy | `--flux-muted` |
+| `--landing-border` | Hairline borders | `--flux-border` |
+| `--landing-surface` | Elevated panels | `--flux-surface` |
+| `--landing-accent` | Verdigris — CTAs, user chat bubbles | `--flux-accent` |
+| `--landing-accent-soft` | FLUX reply bubbles | `--flux-accent-soft` |
+| `--landing-accent-fg` | Text on accent fills | `--flux-accent-fg` |
+| `--landing-flux-bubble` | Assistant bubble fill | `--flux-bubble` |
+| `--landing-chat-user` | User bubble (demos) | `--flux-chat-user` |
+| `--landing-warm` | Tagline em-dash highlight | `--flux-warm` |
+| `--landing-friction` | Problem / traditional tracker accent | `--flux-friction` |
 
 Typography: **Instrument Serif** (`font-display`, headlines), **Geist Sans** (body), **Geist Mono** (amounts).
 
@@ -158,13 +162,14 @@ No extra env vars for the landing page. Auth-aware CTAs use the existing `AuthPr
 
 1. **Keep disclaimers** on any demo that exceeds current API capabilities (`LandingDisclaimer`).
 2. **No decorative icons** — avatars only where they aid chat comprehension; pause/play on carousel controls is allowed.
-3. **Prefer landing tokens** over app `--primary` inside `src/components/landing/`.
+3. **Prefer landing tokens** (`landing-accent`, etc.) or shared `flux-*` utilities inside `src/components/landing/` — both resolve to the same palette.
 4. **Server components by default** — client only for animation/interaction (hero carousel, `conversation-demo`, `ask-flux-interactive`, `landing-nav`, `landing-cta`, `landing-smooth-scroll`, `spending-radar-chart`).
 5. **Hero chat height** — use `HERO_CHAT_VIEWPORT_CLASS`; never `min-height` on the embedded demo (content scrolls inside).
 6. **Section variety** — avoid duplicating the same UI pattern across sections (comparison cards only in Problem; animated chat only in Hero).
 
 ## Related docs
 
+- Design system (shared palette): `docs/design-system.md`
 - Backend integration: `../expense-manager-backend/docs/frontend-integration.md`
 - Auth flows: `docs/email-and-auth-plan.md`
 - Product plan: `docs/plan.md`

@@ -144,7 +144,7 @@ export function AttachmentCard({
               <button
                 type="button"
                 onClick={openPreview}
-                className="shrink-0 cursor-pointer text-[11px] font-medium text-info hover:underline"
+                className="shrink-0 cursor-pointer text-[11px] font-medium text-flux-accent hover:underline"
               >
                 View
               </button>
@@ -220,7 +220,7 @@ function DocumentPreview({
       <div
         className={cn(
           "flex h-14 w-14 items-center justify-center rounded-2xl text-sm font-bold",
-          tone === "doc" && "bg-info/15 text-info",
+          tone === "doc" && "bg-flux-accent-soft text-flux-accent",
           tone === "pdf" && "bg-destructive/10 text-destructive",
         )}
       >
@@ -257,7 +257,7 @@ function DocumentPreview({
           className={cn(
             "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
             tone === "pdf" && "bg-destructive/10 text-destructive",
-            tone === "doc" && "bg-info/15 text-info",
+            tone === "doc" && "bg-flux-accent-soft text-flux-accent",
           )}
         >
           {label}
@@ -274,7 +274,7 @@ function DocumentPreview({
             <button
               type="button"
               onClick={onPreview}
-              className="mt-1 inline-block cursor-pointer text-xs font-medium text-info hover:underline"
+              className="mt-1 inline-block cursor-pointer text-xs font-medium text-flux-accent hover:underline"
             >
               View file
             </button>

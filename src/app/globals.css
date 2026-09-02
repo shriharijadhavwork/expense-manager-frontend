@@ -6,6 +6,24 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* FLUX brand palette — canonical verdigris (hue ~165). */
+  --flux-accent: oklch(0.45 0.08 165);
+  --flux-accent-fg: oklch(0.99 0.004 85);
+  --flux-accent-soft: oklch(0.94 0.03 165);
+  --flux-bubble: oklch(0.96 0.022 165);
+  --flux-bubble-border: oklch(0.86 0.032 165);
+  --flux-chat-user: oklch(0.91 0.036 165);
+  --flux-chat-user-fg: var(--flux-fg);
+  --flux-chat-user-border: oklch(0.82 0.042 165);
+  --flux-bg: oklch(0.985 0.006 85);
+  --flux-fg: oklch(0.18 0.01 75);
+  --flux-muted: oklch(0.55 0.015 75);
+  --flux-border: oklch(0.9 0.008 85);
+  --flux-surface: oklch(0.995 0.004 85);
+  --flux-warm: oklch(0.72 0.06 65);
+  --flux-friction: oklch(0.58 0.14 25);
+  --flux-friction-soft: oklch(0.95 0.035 25);
+
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --muted: oklch(0.97 0 0);
@@ -13,34 +31,35 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: var(--flux-accent);
+  --primary-foreground: var(--flux-accent-fg);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: var(--flux-accent-soft);
+  --accent-foreground: var(--flux-fg);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: #ffffff;
-  --success: #10a37f;
-  --success-foreground: #ffffff;
+  --success: var(--flux-accent);
+  --success-foreground: var(--flux-accent-fg);
   --warning: #9a6700;
   --warning-foreground: #fffbeb;
-  --info: #175cd3;
-  --info-foreground: #f5f9ff;
+  --info: var(--flux-accent);
+  --info-foreground: var(--flux-accent-fg);
   --expense: #ef4444;
-  --income: #10a37f;
+  --income: var(--flux-accent);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-hover: rgb(0 0 0 / 0.04);
-  --chat-user: #e8f3fe;
-  --chat-user-foreground: #0d0d0d;
+  --chat-user: var(--flux-chat-user);
+  --chat-user-foreground: var(--flux-chat-user-fg);
+  --chat-user-border: var(--flux-chat-user-border);
   --chat-peer: #eef1f5;
   --chat-peer-foreground: #0d0d0d;
   --chat-peer-border: #d8dee8;
-  --chat-assistant: #ffffff;
-  --chat-assistant-foreground: #0d0d0d;
+  --chat-assistant: var(--flux-bubble);
+  --chat-assistant-foreground: var(--flux-fg);
   --composer-surface: #ffffff;
   --overlay: rgb(0 0 0 / 0.35);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
@@ -60,13 +79,31 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: var(--flux-accent);
+  --sidebar-primary-foreground: var(--flux-accent-fg);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: var(--flux-bubble-border);
 }
 
 .dark {
+  /* FLUX brand palette — dark mode (green family, not blue). */
+  --flux-accent: oklch(0.62 0.1 165);
+  --flux-accent-fg: oklch(0.14 0.02 165);
+  --flux-accent-soft: oklch(0.28 0.04 165);
+  --flux-bubble: oklch(0.44 0.028 165);
+  --flux-bubble-border: oklch(0.58 0.04 165);
+  --flux-chat-user: oklch(0.39 0.052 165);
+  --flux-chat-user-fg: oklch(0.95 0.012 165);
+  --flux-chat-user-border: oklch(0.48 0.055 165);
+  --flux-bg: oklch(0.16 0.012 165);
+  --flux-fg: oklch(0.95 0.01 165);
+  --flux-muted: oklch(0.68 0.02 165);
+  --flux-border: oklch(0.32 0.02 165);
+  --flux-surface: oklch(0.22 0.018 165);
+  --flux-warm: oklch(0.55 0.05 65);
+  --flux-friction: oklch(0.65 0.12 25);
+  --flux-friction-soft: oklch(0.28 0.04 25);
+
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -76,34 +113,35 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: var(--flux-accent);
+  --primary-foreground: var(--flux-accent-fg);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent: var(--flux-accent-soft);
+  --accent-foreground: var(--flux-fg);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: #212121;
-  --success: #34d399;
-  --success-foreground: #062116;
+  --success: var(--flux-accent);
+  --success-foreground: var(--flux-accent-fg);
   --warning: #f5b83d;
   --warning-foreground: #2a1d00;
-  --info: #84adff;
-  --info-foreground: #0b1b3a;
+  --info: var(--flux-accent);
+  --info-foreground: var(--flux-accent-fg);
   --expense: #f87171;
-  --income: #34d399;
+  --income: var(--flux-accent);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-hover: rgb(255 255 255 / 0.06);
-  --chat-user: #1e4d8f;
-  --chat-user-foreground: #f4f8ff;
+  --chat-user: var(--flux-chat-user);
+  --chat-user-foreground: var(--flux-chat-user-fg);
+  --chat-user-border: var(--flux-chat-user-border);
   --chat-peer: #454545;
   --chat-peer-foreground: #f0f0f0;
   --chat-peer-border: #666666;
-  --chat-assistant: #2a2a2a;
-  --chat-assistant-foreground: #ececec;
+  --chat-assistant: var(--flux-bubble);
+  --chat-assistant-foreground: var(--flux-fg);
   --composer-surface: #303030;
   --overlay: rgb(0 0 0 / 0.55);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.15);
@@ -116,35 +154,54 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: var(--flux-accent);
+  --sidebar-primary-foreground: var(--flux-accent-fg);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: var(--flux-bubble-border);
 }
 
 /* FLUX landing — always light (warm paper + verdigris). Not tied to app dark mode. */
 .landing {
-  --landing-bg: oklch(0.985 0.006 85);
-  --landing-fg: oklch(0.18 0.01 75);
-  --landing-muted: oklch(0.55 0.015 75);
-  --landing-border: oklch(0.9 0.008 85);
-  --landing-surface: oklch(0.995 0.004 85);
-  --landing-accent: oklch(0.45 0.08 165);
-  --landing-accent-fg: oklch(0.99 0.004 85);
-  --landing-accent-soft: oklch(0.94 0.03 165);
-  --landing-flux-bubble: oklch(0.87 0.048 165);
-  --landing-flux-bubble-border: oklch(0.72 0.06 165);
-  --landing-chat-user: oklch(0.52 0.07 165);
-  --landing-chat-user-fg: #ffffff;
-  --landing-warm: oklch(0.72 0.06 65);
-  --landing-friction: oklch(0.58 0.14 25);
-  --landing-friction-soft: oklch(0.95 0.035 25);
+  /* Pin light FLUX palette inside landing (overrides html.dark flux tokens). */
+  --flux-accent: oklch(0.45 0.08 165);
+  --flux-accent-fg: oklch(0.99 0.004 85);
+  --flux-accent-soft: oklch(0.94 0.03 165);
+  --flux-bubble: oklch(0.96 0.022 165);
+  --flux-bubble-border: oklch(0.86 0.032 165);
+  --flux-chat-user: oklch(0.52 0.07 165);
+  --flux-chat-user-fg: #ffffff;
+  --flux-chat-user-border: oklch(0.46 0.08 165);
+  --flux-bg: oklch(0.985 0.006 85);
+  --flux-fg: oklch(0.18 0.01 75);
+  --flux-muted: oklch(0.55 0.015 75);
+  --flux-border: oklch(0.9 0.008 85);
+  --flux-surface: oklch(0.995 0.004 85);
+  --flux-warm: oklch(0.72 0.06 65);
+  --flux-friction: oklch(0.58 0.14 25);
+  --flux-friction-soft: oklch(0.95 0.035 25);
+
+  /* Legacy landing names → canonical FLUX tokens (no landing TSX changes). */
+  --landing-bg: var(--flux-bg);
+  --landing-fg: var(--flux-fg);
+  --landing-muted: var(--flux-muted);
+  --landing-border: var(--flux-border);
+  --landing-surface: var(--flux-surface);
+  --landing-accent: var(--flux-accent);
+  --landing-accent-fg: var(--flux-accent-fg);
+  --landing-accent-soft: var(--flux-accent-soft);
+  --landing-flux-bubble: var(--flux-bubble);
+  --landing-flux-bubble-border: var(--flux-bubble-border);
+  --landing-chat-user: var(--flux-chat-user);
+  --landing-chat-user-fg: var(--flux-chat-user-fg);
+  --landing-warm: var(--flux-warm);
+  --landing-friction: var(--flux-friction);
+  --landing-friction-soft: var(--flux-friction-soft);
   --landing-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --landing-motion-enter: 0.72s;
   --landing-motion-reveal: 0.9s;
   /* Keep app Button tokens on-brand even when html.dark is set (common on mobile). */
-  --primary: var(--landing-accent);
-  --primary-foreground: var(--landing-accent-fg);
+  --primary: var(--flux-accent);
+  --primary-foreground: var(--flux-accent-fg);
   background:
     linear-gradient(
       180deg,
@@ -563,12 +620,29 @@ html:has(.landing) {
   --color-sidebar-hover: var(--sidebar-hover);
   --color-chat-user: var(--chat-user);
   --color-chat-user-foreground: var(--chat-user-foreground);
+  --color-chat-user-border: var(--chat-user-border);
   --color-chat-peer: var(--chat-peer);
   --color-chat-peer-foreground: var(--chat-peer-foreground);
   --color-chat-peer-border: var(--chat-peer-border);
   --color-chat-assistant: var(--chat-assistant);
   --color-chat-assistant-foreground: var(--chat-assistant-foreground);
   --color-composer-surface: var(--composer-surface);
+  --color-flux-accent: var(--flux-accent);
+  --color-flux-accent-fg: var(--flux-accent-fg);
+  --color-flux-accent-soft: var(--flux-accent-soft);
+  --color-flux-bubble: var(--flux-bubble);
+  --color-flux-bubble-border: var(--flux-bubble-border);
+  --color-flux-chat-user: var(--flux-chat-user);
+  --color-flux-chat-user-fg: var(--flux-chat-user-fg);
+  --color-flux-chat-user-border: var(--flux-chat-user-border);
+  --color-flux-bg: var(--flux-bg);
+  --color-flux-fg: var(--flux-fg);
+  --color-flux-muted: var(--flux-muted);
+  --color-flux-border: var(--flux-border);
+  --color-flux-surface: var(--flux-surface);
+  --color-flux-warm: var(--flux-warm);
+  --color-flux-friction: var(--flux-friction);
+  --color-flux-friction-soft: var(--flux-friction-soft);
   --color-landing-bg: var(--landing-bg);
   --color-landing-fg: var(--landing-fg);
   --color-landing-muted: var(--landing-muted);
@@ -678,6 +752,55 @@ label[for],
 button:disabled,
 [aria-disabled="true"] {
   cursor: not-allowed;
+}
+
+/* Read-only BlockNote inside FLUX assistant chat bubbles */
+.assistant-blocknote {
+  --bn-font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  width: 100%;
+}
+
+.assistant-blocknote .bn-container {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  min-height: 0;
+}
+
+.assistant-blocknote .bn-editor {
+  padding: 0;
+  min-height: 0;
+  font-size: 0.9375rem;
+  line-height: 1.625;
+  color: inherit;
+  background: transparent;
+}
+
+.assistant-blocknote .bn-block-group {
+  margin: 0;
+}
+
+.assistant-blocknote .bn-block-outer {
+  margin: 0;
+}
+
+.assistant-blocknote .bn-block-content {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+
+.assistant-blocknote .bn-block-content[data-content-type="bulletListItem"],
+.assistant-blocknote .bn-block-content[data-content-type="numberedListItem"] {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.assistant-blocknote [contenteditable="true"] {
+  caret-color: transparent;
+}
+
+.assistant-blocknote .bn-inline-content:empty::before {
+  content: none;
 }
 
 @layer base {
