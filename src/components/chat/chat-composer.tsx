@@ -176,7 +176,7 @@ export function ChatComposer({
             className={cn(
               "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
               canSend
-                ? "bg-foreground text-background hover:opacity-90"
+                ? "bg-primary text-primary-foreground hover:opacity-90"
                 : "bg-muted text-muted-foreground",
             )}
             onClick={onSend}

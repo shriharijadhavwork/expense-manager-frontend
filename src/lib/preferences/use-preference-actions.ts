@@ -64,9 +64,17 @@ export function usePreferenceActions() {
     [savePreferences, setCurrency],
   );
 
+  const updateMonthlyIncome = useCallback(
+    async (monthlyIncome: number | null) => {
+      await savePreferences({ monthlyIncome });
+    },
+    [savePreferences],
+  );
+
   return {
     updateTheme,
     updateTimezone,
     updateCurrency,
+    updateMonthlyIncome,
   };
 }

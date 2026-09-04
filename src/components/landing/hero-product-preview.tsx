@@ -54,13 +54,21 @@ export function HeroProductPreview({ className }: HeroProductPreviewProps) {
       )}
     >
       <div className="relative flex h-10 items-center border-b border-black/40 bg-[#2d2d2d] px-3.5">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/10"
+          aria-hidden
+        />
         <MacTrafficLights />
-        <span className="pointer-events-none absolute inset-x-0 text-center text-[13px] font-medium tracking-tight text-white/50">
+        <span className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-1.5 text-center text-[13px] font-medium tracking-tight text-white/50">
+          <span
+            className="h-1.5 w-1.5 rounded-full bg-landing-accent"
+            aria-hidden
+          />
           FLUX
         </span>
       </div>
 
-      <div className={cn("w-full overflow-hidden bg-[#f5f5f7]", HERO_CHAT_VIEWPORT_CLASS)}>
+      <div className={cn("w-full overflow-hidden bg-landing-surface", HERO_CHAT_VIEWPORT_CLASS)}>
         <HeroConversationCarousel
           className="h-full"
           activeIndex={activeIndex}
@@ -84,37 +92,43 @@ export function HeroProductPreview({ className }: HeroProductPreviewProps) {
         className="pointer-events-none absolute -inset-8 -z-10 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,color-mix(in_oklab,var(--landing-accent)_35%,#3a3a3c)_0%,transparent_70%)] opacity-30 blur-3xl sm:-inset-12"
         aria-hidden
       />
+      <div
+        className="pointer-events-none absolute -bottom-6 -right-6 -z-10 h-40 w-40 rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--landing-accent)_45%,transparent)_0%,transparent_72%)] opacity-40 blur-2xl"
+        aria-hidden
+      />
 
-      {useTilt ? (
-        <Tilt
-          tiltEnable
-          tiltMaxAngleX={7}
-          tiltMaxAngleY={9}
-          tiltAngleXInitial={5}
-          tiltAngleYInitial={8}
-          glareEnable
-          glareMaxOpacity={0.14}
-          glareColor="#ffffff"
-          glarePosition="all"
-          glareBorderRadius="0.75rem"
-          scale={1.015}
-          perspective={1400}
-          transitionSpeed={1400}
-          className="transform-gpu will-change-transform"
-        >
-          {frame}
-        </Tilt>
-      ) : (
-        <div
-          className={cn(
-            !coarsePointer &&
-              "[transform:perspective(1200px)_rotateX(4deg)_rotateY(8deg)]",
-          )}
-          style={coarsePointer ? undefined : { transformStyle: "preserve-3d" }}
-        >
-          {frame}
-        </div>
-      )}
+      <div className={cn(!reducedMotion && "landing-hero-float")}>
+        {useTilt ? (
+          <Tilt
+            tiltEnable
+            tiltMaxAngleX={7}
+            tiltMaxAngleY={9}
+            tiltAngleXInitial={5}
+            tiltAngleYInitial={8}
+            glareEnable
+            glareMaxOpacity={0.14}
+            glareColor="#ffffff"
+            glarePosition="all"
+            glareBorderRadius="0.75rem"
+            scale={1.015}
+            perspective={1400}
+            transitionSpeed={1400}
+            className="transform-gpu will-change-transform"
+          >
+            {frame}
+          </Tilt>
+        ) : (
+          <div
+            className={cn(
+              !coarsePointer &&
+                "[transform:perspective(1200px)_rotateX(4deg)_rotateY(8deg)]",
+            )}
+            style={coarsePointer ? undefined : { transformStyle: "preserve-3d" }}
+          >
+            {frame}
+          </div>
+        )}
+      </div>
 
       <HeroCarouselControls
         className="relative z-20 mt-3.5 sm:mt-4"

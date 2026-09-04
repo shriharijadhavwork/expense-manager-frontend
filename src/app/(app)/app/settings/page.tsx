@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { SUPPORTED_CURRENCIES } from "@/lib/currency/currency";
 import { useCurrency } from "@/lib/currency/currency-provider";
@@ -11,6 +13,7 @@ import { usePreferenceActions } from "@/lib/preferences/use-preference-actions";
 import { TIMEZONE_OPTIONS } from "@/lib/timezone/timezone";
 import { useTimezone } from "@/lib/timezone/timezone-provider";
 import { useTheme, type ThemePreference } from "@/lib/theme/theme-provider";
+import { formatMoney } from "@/utils/format";
 import { cn } from "@/utils/cn";
 
 const themeOptions: Array<{ value: ThemePreference; label: string }> = [
@@ -20,11 +23,62 @@ const themeOptions: Array<{ value: ThemePreference; label: string }> = [
 ];
 
 export default function SettingsPage() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const { theme } = useTheme();
   const { preference, detectedTimezone } = useTimezone();
   const { currency } = useCurrency();
-  const { updateTheme, updateTimezone, updateCurrency } = usePreferenceActions();
+  const { updateTheme, updateTimezone, updateCurrency, updateMonthlyIncome } =
+    usePreferenceActions();
+
+  const monthlyIncome = user?.preferences.monthlyIncome ?? null;
+  const [incomeInput, setIncomeInput] = useState(() =>
+    monthlyIncome === null ? "" : String(monthlyIncome),
+  );
+  const [syncedIncome, setSyncedIncome] = useState(monthlyIncome);
+  const [incomeError, setIncomeError] = useState<string | null>(null);
+  const [savingIncome, setSavingIncome] = useState(false);
+
+  // Re-sync the input when the server value changes underneath us (e.g.
+  // another tab, or a fresh login) — the React-recommended alternative to a
+  // useEffect for "adjust state when a prop changes".
+  if (monthlyIncome !== syncedIncome) {
+    setSyncedIncome(monthlyIncome);
+    setIncomeInput(monthlyIncome === null ? "" : String(monthlyIncome));
+  }
+
+  async function onSaveIncome(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmed = incomeInput.trim();
+
+    if (!trimmed) {
+      setIncomeError("Enter an amount, or use Clear to remove it.");
+      return;
+    }
+
+    const value = Number(trimmed);
+    if (!Number.isFinite(value) || value < 0) {
+      setIncomeError("Enter a valid amount, 0 or greater.");
+      return;
+    }
+
+    setIncomeError(null);
+    setSavingIncome(true);
+    try {
+      await updateMonthlyIncome(value);
+    } finally {
+      setSavingIncome(false);
+    }
+  }
+
+  async function onClearIncome() {
+    setIncomeError(null);
+    setSavingIncome(true);
+    try {
+      await updateMonthlyIncome(null);
+    } finally {
+      setSavingIncome(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -117,6 +171,54 @@ export default function SettingsPage() {
               </p>
             </div>
           </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-base font-semibold">Budget</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Set your monthly income to see how much is left after spending,
+            right on your dashboard. This is a planning figure — not your
+            actual bank balance.
+          </p>
+          <form
+            className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end"
+            onSubmit={(event) => void onSaveIncome(event)}
+          >
+            <div className="flex-1 sm:max-w-xs">
+              <Input
+                label={`Monthly income (${currency})`}
+                inputMode="decimal"
+                placeholder="e.g. 75000"
+                value={incomeInput}
+                onChange={(event) => {
+                  setIncomeInput(event.target.value);
+                  setIncomeError(null);
+                }}
+                error={incomeError ?? undefined}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" loading={savingIncome}>
+                Save
+              </Button>
+              {monthlyIncome !== null ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={savingIncome}
+                  onClick={() => void onClearIncome()}
+                >
+                  Clear
+                </Button>
+              ) : null}
+            </div>
+          </form>
+          {monthlyIncome !== null ? (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Currently set to {formatMoney(monthlyIncome, currency)} per
+              month.
+            </p>
+          ) : null}
         </Card>
 
         <Card>

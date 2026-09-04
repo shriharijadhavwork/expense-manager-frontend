@@ -142,8 +142,8 @@ function ThreadRail() {
               className={cn(
                 "rounded-[var(--radius-md)] border px-3 py-2.5 transition-colors",
                 thread.active
-                  ? "border-landing-accent/30 bg-white shadow-[0_2px_8px_-4px_color-mix(in_oklab,var(--landing-accent)_30%,transparent)]"
-                  : "border-landing-border/80 bg-white/55",
+                  ? "border-landing-accent/30 bg-landing-elevated shadow-[0_2px_8px_-4px_color-mix(in_oklab,var(--landing-accent)_30%,transparent)]"
+                  : "border-landing-border/80 bg-landing-surface",
               )}
             >
               <div className="flex items-center justify-between gap-2">
@@ -183,7 +183,7 @@ function TripSettlementBoard() {
         </span>
       </div>
 
-      <div className="mt-3 overflow-hidden rounded-[var(--radius-md)] border border-landing-border/80 bg-white/80">
+      <div className="mt-3 overflow-hidden rounded-[var(--radius-md)] border border-landing-border/80 bg-landing-elevated">
         <div className="grid grid-cols-[1.1fr_0.8fr_0.7fr] gap-2 border-b border-landing-border/70 bg-landing-bg/60 px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-landing-muted">
           <span>Expense</span>
           <span>Paid by</span>
@@ -273,7 +273,7 @@ function HouseholdMeter() {
         {HOME_SPLITS.map((split) => (
           <li
             key={split.label}
-            className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border border-landing-border/70 bg-white/75 px-3 py-2 text-[12px]"
+            className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border border-landing-border/70 bg-landing-elevated px-3 py-2 text-[12px]"
           >
             <span className="text-landing-fg">{split.label}</span>
             <span className="font-mono tabular-nums text-landing-muted">

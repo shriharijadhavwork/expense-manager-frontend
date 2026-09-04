@@ -22,7 +22,7 @@ function ComposerVisual() {
         </p>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <div className="h-9 min-w-0 flex-1 rounded-[var(--radius-md)] border border-dashed border-landing-border bg-white/80 px-3 text-[12px] leading-9 text-landing-muted/70">
+        <div className="h-9 min-w-0 flex-1 rounded-[var(--radius-md)] border border-dashed border-landing-border bg-landing-elevated px-3 text-[12px] leading-9 text-landing-muted/70">
           Say what happened…
         </div>
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-landing-accent text-[10px] font-bold uppercase tracking-wide text-white">
@@ -78,11 +78,11 @@ function StructureVisual() {
               tag.tone === "amount" &&
                 "border-landing-accent/25 bg-landing-accent/10 font-mono tabular-nums text-landing-accent",
               tag.tone === "category" &&
-                "border-landing-border bg-white text-landing-fg",
+                "border-landing-border bg-landing-elevated text-landing-fg",
               tag.tone === "people" &&
                 "border-landing-warm/30 bg-landing-warm/15 text-landing-fg",
               tag.tone === "split" &&
-                "border-landing-accent/20 bg-white text-landing-muted",
+                "border-landing-accent/20 bg-landing-elevated text-landing-muted",
             )}
           >
             {tag.label}
@@ -118,7 +118,7 @@ function MoveOnVisual() {
         when you need it.
       </p>
 
-      <div className="mt-4 rounded-[var(--radius-md)] border border-dashed border-landing-border bg-white/70 px-3 py-2.5">
+      <div className="mt-4 rounded-[var(--radius-md)] border border-dashed border-landing-border bg-landing-elevated px-3 py-2.5">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
           Later, if you want
         </p>

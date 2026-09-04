@@ -10,6 +10,8 @@ export type UserPreferences = {
   theme: "light" | "dark" | "system";
   timezone: string;
   defaultCurrency: string;
+  /** Denominated in `defaultCurrency`. Null = not configured. */
+  monthlyIncome: number | null;
 };
 
 export type AuthResult = {

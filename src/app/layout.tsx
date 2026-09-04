@@ -1,22 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { appConfig } from "@/config/env";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Inter — the proven fintech/product-UI choice (Razorpay's Blade design
+// system, GoCardless, Linear, GitHub, Figma). Tall x-height and open
+// apertures keep it legible at the small sizes financial UI leans on.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
+// Kept for tabular currency figures — a dedicated mono face reads cleaner
+// for amounts than falling back to a generic system mono.
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const instrumentSerif = Instrument_Serif({
-  weight: "400",
-  variable: "--font-instrument-serif",
   subsets: ["latin"],
 });
 
@@ -48,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />

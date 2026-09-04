@@ -41,7 +41,7 @@ function FormFieldMock({
       </span>
       <div
         className={cn(
-          "mt-1.5 h-9 rounded-[var(--radius-md)] border bg-white shadow-[inset_0_1px_2px_rgb(0_0_0/0.04)]",
+          "mt-1.5 h-9 rounded-[var(--radius-md)] border bg-landing-elevated",
           stale
             ? "border-landing-friction/25"
             : "border-landing-border",
@@ -64,7 +64,7 @@ function TraditionalPanel() {
       </p>
 
       <div
-        className="mt-6 rounded-[var(--radius-md)] border border-dashed border-landing-friction/20 bg-white/70 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.8)] sm:p-5"
+        className="mt-6 rounded-[var(--radius-md)] border border-dashed border-landing-friction/20 bg-landing-elevated p-4 sm:p-5"
         aria-hidden
       >
         <div className="grid gap-3 sm:grid-cols-2">
@@ -99,7 +99,7 @@ function TraditionalPanel() {
 function FluxChatMock() {
   return (
     <div
-      className="relative mt-6 overflow-hidden rounded-[var(--radius-md)] border border-white/70 bg-white/85 p-4 shadow-[0_8px_24px_-12px_color-mix(in_oklab,var(--landing-accent)_35%,transparent)] backdrop-blur-sm"
+      className="relative mt-6 overflow-hidden rounded-[var(--radius-md)] border border-landing-border bg-landing-elevated p-4 shadow-[0_8px_24px_-12px_color-mix(in_oklab,var(--landing-accent)_35%,transparent)]"
       aria-hidden
     >
       <div
@@ -115,7 +115,7 @@ function FluxChatMock() {
         <div className="flex justify-start">
           <div className="max-w-[88%] rounded-[1rem] rounded-bl-[0.25rem] border border-landing-flux-bubble-border/45 bg-landing-flux-bubble px-3 py-2.5 text-[13px] text-landing-fg shadow-[0_2px_6px_rgb(0_0_0/0.06)]">
             <span className="font-medium text-landing-accent">Got it.</span>
-            <div className="mt-2 rounded-md border border-landing-accent/20 bg-white px-2.5 py-1.5 font-mono text-[12px] font-semibold tabular-nums text-landing-accent shadow-sm">
+            <div className="mt-2 rounded-md border border-landing-accent/20 bg-landing-elevated px-2.5 py-1.5 font-mono text-[12px] font-semibold tabular-nums text-landing-accent">
               ₹620
               <span className="mx-1 font-sans font-normal text-landing-muted">
                 ·

@@ -202,7 +202,7 @@ export function MessageBubble({
       !isOwnMessage &&
       "w-fit max-w-full px-3 py-1.5 text-[0.9375rem] leading-snug border border-chat-peer-border bg-chat-peer text-chat-peer-foreground",
     isAssistant &&
-      "px-3.5 py-2 text-[0.9375rem] leading-relaxed shadow-sm border border-flux-bubble-border/40 bg-chat-assistant text-chat-assistant-foreground ring-1 ring-flux-bubble-border/20",
+      "px-3.5 py-2 text-[0.9375rem] leading-relaxed border border-flux-bubble-border bg-chat-assistant text-chat-assistant-foreground",
   );
 
   const messageBody = (

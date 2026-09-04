@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { LandingDisclaimer } from "@/components/landing/landing-disclaimer";
 import { LandingSection } from "@/components/landing/landing-section";
+import { Reveal } from "@/components/landing/reveal";
 import { cn } from "@/utils/cn";
 
 const AVATAR_TONES = [
@@ -123,7 +124,7 @@ function SharedSpendVisual({ compact }: { compact?: boolean }) {
         ].map((item) => (
           <li
             key={item.label}
-            className="rounded-[var(--radius-md)] border border-landing-border/60 bg-white/70 px-2.5 py-2 text-center text-[11px]"
+            className="rounded-[var(--radius-md)] border border-landing-border/60 bg-landing-elevated px-2.5 py-2 text-center text-[11px]"
           >
             <span className="text-landing-muted">{item.label}</span>
             <span className="mt-0.5 block font-mono font-semibold tabular-nums text-landing-fg">
@@ -208,7 +209,7 @@ function WeekendRhythmVisual() {
                 "flex aspect-square w-full max-w-9 items-center justify-center rounded-full text-[9px] font-semibold sm:text-[10px]",
                 day.weekend
                   ? "bg-landing-accent text-white shadow-[0_2px_6px_color-mix(in_oklab,var(--landing-accent)_30%,transparent)]"
-                  : "border border-landing-border bg-white/80 text-landing-muted",
+                  : "border border-landing-border bg-landing-elevated text-landing-muted",
               )}
             >
               {day.label}
@@ -239,6 +240,7 @@ function InsightCard({
   visual,
   className,
   featured,
+  delay,
 }: {
   badge: string;
   title: string;
@@ -246,11 +248,13 @@ function InsightCard({
   visual: ReactNode;
   className?: string;
   featured?: boolean;
+  delay?: number;
 }) {
   return (
-    <article
+    <Reveal
+      delay={delay}
       className={cn(
-        "landing-insight-card landing-reveal landing-reveal-item relative rounded-[var(--radius-lg)] border border-white/70 p-5 sm:p-6",
+        "landing-insight-card relative rounded-[var(--radius-lg)] border border-landing-border p-5 sm:p-6",
         featured && "lg:p-6",
         className,
       )}
@@ -288,13 +292,13 @@ function InsightCard({
 
         <div className={cn(featured ? "mt-5 lg:mt-0" : "mt-5")}>{visual}</div>
       </div>
-    </article>
+    </Reveal>
   );
 }
 
 function InsightsPatternBoard() {
   return (
-    <div className="landing-insights-board landing-reveal landing-reveal-body relative rounded-[var(--radius-lg)] border border-landing-accent/15 p-4 sm:p-5 lg:p-6">
+    <Reveal className="landing-insights-board relative rounded-[var(--radius-lg)] border border-landing-accent/15 p-4 sm:p-5 lg:p-6">
       <div className="relative flex flex-wrap items-center justify-between gap-3 border-b border-landing-accent/10 pb-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-landing-muted">
@@ -304,7 +308,7 @@ function InsightsPatternBoard() {
             March · FLUX is watching
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-landing-accent/20 bg-white/80 px-3 py-1.5">
+        <div className="flex items-center gap-2 rounded-full border border-landing-accent/20 bg-landing-elevated px-3 py-1.5">
           <span
             className="landing-insight-live h-2 w-2 rounded-full bg-landing-accent"
             aria-hidden
@@ -329,15 +333,17 @@ function InsightsPatternBoard() {
           title="Dining is up 24% compared with last month."
           detail="₹8,420 this month vs ₹6,790 last month."
           visual={<DiningTrendVisual />}
+          delay={80}
         />
         <InsightCard
           badge="Weekend rhythm"
           title="You spent more on weekends this month."
           detail="62% of discretionary spend landed on Sat–Sun."
           visual={<WeekendRhythmVisual />}
+          delay={160}
         />
       </div>
-    </div>
+    </Reveal>
   );
 }
 

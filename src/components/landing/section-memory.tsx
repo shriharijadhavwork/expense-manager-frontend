@@ -152,7 +152,7 @@ function RecallResultPanel() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
             Later, you ask
           </p>
-          <div className="mt-3 rounded-[var(--radius-md)] border border-landing-border bg-white/85 px-4 py-3">
+          <div className="mt-3 rounded-[var(--radius-md)] border border-landing-border bg-landing-elevated px-4 py-3">
             <p className="text-[13px] leading-relaxed text-landing-fg">
               &ldquo;Who still owes me for the weekend trip?&rdquo;
             </p>
@@ -174,7 +174,7 @@ function RecallResultPanel() {
         </div>
 
         <div
-          className="rounded-[var(--radius-md)] border border-landing-border bg-white/90 p-4"
+          className="rounded-[var(--radius-md)] border border-landing-border bg-landing-elevated p-4"
           aria-hidden
         >
           <div className="flex flex-wrap items-center justify-between gap-3">

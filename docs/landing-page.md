@@ -100,26 +100,29 @@ src/components/landing/
 
 ## Design system (landing-scoped)
 
-**Canonical palette:** [`design-system.md`](design-system.md) — shared `--flux-*` tokens power both landing and app.
+**Canonical palette:** [`design-system.md`](design-system.md) — the same `--flux-*` tokens now power the landing page, the entire signed-in app, and chat.
 
-Tokens live on `.landing` in `globals.css`. The landing page **always uses the light palette** — it does not follow app/system dark mode (`/app` still respects theme). Inside `.landing`, `--landing-*` names are **aliases** to `--flux-*` (same verdigris values as the app).
+Tokens live on `.landing` in `globals.css`. The landing page **always uses its own dark Mercury palette** — it does not follow the app's light/dark toggle (`/app` still respects the user's Settings → Appearance choice; landing is intentionally pinned regardless). Inside `.landing`, `--landing-*` names are **aliases** to `--flux-*`.
 
 | Token | Role | FLUX source |
 | --- | --- | --- |
-| `--landing-bg` | Warm paper background | `--flux-bg` |
-| `--landing-fg` | Ink text | `--flux-fg` |
-| `--landing-muted` | Secondary copy | `--flux-muted` |
+| `--landing-bg` | Onyx background | `--flux-bg` (`#171721`) |
+| `--landing-fg` | Primary text | `--flux-fg` (`#ededf3`) |
+| `--landing-muted` | Secondary copy | `--flux-muted` (`#c3c3cc`) |
 | `--landing-border` | Hairline borders | `--flux-border` |
-| `--landing-surface` | Elevated panels | `--flux-surface` |
-| `--landing-accent` | Verdigris — CTAs, user chat bubbles | `--flux-accent` |
-| `--landing-accent-soft` | FLUX reply bubbles | `--flux-accent-soft` |
-| `--landing-accent-fg` | Text on accent fills | `--flux-accent-fg` |
+| `--landing-surface` | Graphite panels | `--flux-surface` (`#1e1e2a`) |
+| `--landing-elevated` | Obsidian nested/interactive tier | `--flux-elevated` (`#272735`) |
+| `--landing-accent` | Cobalt — CTAs, user chat bubbles | `--flux-accent` (`#5266eb`) |
+| `--landing-accent-soft` | FLUX reply bubbles / chips | `--flux-accent-soft` |
+| `--landing-accent-fg` | Text on accent fills | `--flux-accent-fg` (`#ffffff`) |
 | `--landing-flux-bubble` | Assistant bubble fill | `--flux-bubble` |
-| `--landing-chat-user` | User bubble (demos) | `--flux-chat-user` |
-| `--landing-warm` | Tagline em-dash highlight | `--flux-warm` |
+| `--landing-chat-user` | User bubble (demos) | `--flux-chat-user` (Cobalt) |
+| `--landing-warm` | Secondary neutral (multi-person avatars/charts) | `--flux-warm` |
 | `--landing-friction` | Problem / traditional tracker accent | `--flux-friction` |
 
-Typography: **Instrument Serif** (`font-display`, headlines), **Geist Sans** (body), **Geist Mono** (amounts).
+Decorative gradients, dot-grid textures, and the ruled-paper hero background from the original verdigris design were removed as part of the Mercury pass — surfaces are flat Onyx/Graphite/Obsidian with a single restrained border or glow, not layered gradients.
+
+Typography: **Geist Sans** for everything, including headings (`font-display` now resolves to Geist Sans — Instrument Serif was removed from the codebase). **Geist Mono** for amounts.
 
 Scroll: Lenis smooth scroll with `prefers-reduced-motion` fallback; section reveals via CSS `animation-timeline: view()`.
 

@@ -311,12 +311,12 @@ function ThreadHeader({
   participants?: string[];
 }) {
   return (
-    <div className="border-b border-black/[0.06] px-4 py-2.5">
-      <p className="truncate text-center text-[12px] font-medium text-[#1c1c1e]">
+    <div className="border-b border-landing-border px-4 py-2.5">
+      <p className="truncate text-center text-[12px] font-medium text-landing-fg">
         {threadLabel}
       </p>
       {participants && participants.length > 1 ? (
-        <p className="mt-0.5 truncate text-center text-[10px] text-[#8e8e93]">
+        <p className="mt-0.5 truncate text-center text-[10px] text-landing-muted">
           {participants.join(" · ")}
         </p>
       ) : null}
@@ -412,7 +412,7 @@ export function ConversationDemo({
   }, [visibleMessageIndices.length, typing, stage, reducedMotion]);
 
   const shellClass = isMac
-    ? "flex h-full w-full flex-col overflow-hidden bg-[#f5f5f7]"
+    ? "flex h-full w-full flex-col overflow-hidden bg-landing-surface"
     : embedded
       ? "flex h-full flex-col overflow-hidden bg-landing-bg"
       : "flex min-h-[24rem] flex-col rounded-[var(--radius-lg)] border border-landing-border bg-landing-surface shadow-[var(--shadow-sm)] sm:min-h-[26rem]";
@@ -441,7 +441,7 @@ export function ConversationDemo({
             />
           ) : null}
           <div className="flex justify-center px-4 py-1.5">
-            <span className="rounded-full bg-black/[0.06] px-2.5 py-0.5 text-[11px] font-medium text-[#8e8e93]">
+            <span className="rounded-full bg-landing-elevated px-2.5 py-0.5 text-[11px] font-medium text-landing-muted">
               {scenario.dateLabel}
             </span>
           </div>

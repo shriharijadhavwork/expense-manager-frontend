@@ -108,16 +108,16 @@ Realtime subscription requires a persisted thread id (`isPersistedThreadId`).
 
 ## Brand colors (chat bubbles)
 
-Chat uses the unified **FLUX verdigris** palette (`docs/design-system.md`). Semantic tokens in `globals.css`:
+Chat uses the unified **FLUX Mercury** palette — Onyx/Graphite/Obsidian surfaces with a single Cobalt (`#5266eb`) accent, shared with the landing page and the rest of the signed-in app (`docs/design-system.md`). Semantic tokens in `globals.css`:
 
 | Element | Tokens / classes |
 | --- | --- |
-| Your messages | `bg-chat-user` → `--flux-chat-user` (green, white text) |
-| FLUX replies | `bg-chat-assistant` → `--flux-bubble`; border `border-flux-bubble-border` |
-| FLUX avatar ring | `ring-flux-bubble-border/40` |
+| Your messages | `bg-chat-user` → `--flux-chat-user` (Cobalt fill, white text) |
+| FLUX replies | `bg-chat-assistant` → `--flux-bubble` (Graphite); border `border-flux-bubble-border` |
+| Financial figures in assistant Markdown | `.assistant-blocknote` applies `tabular-nums` and restrained table/code styling so amounts scan cleanly — see `globals.css` |
 | Links in attachments | `text-flux-accent` |
 
-Landing hero demos use the same hues via `--landing-chat-user` / `--landing-flux-bubble` aliases.
+Landing hero demos use the same hues via `--landing-chat-user` / `--landing-flux-bubble` aliases. There is no longer a separate "app" palette vs. "chat" palette — `:root`/`.dark` in `globals.css` are the single source for both.
 
 ---
 

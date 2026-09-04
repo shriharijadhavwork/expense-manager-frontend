@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -13,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/shared/toast";
 import { ExpenseCategoryFields } from "@/components/expenses/expense-category-fields";
 import { ExpenseDirectionSelect } from "@/components/expenses/expense-direction-select";
+import { PencilIcon, TrashIcon } from "@/components/ui/icons";
 import { expensesApi } from "@/lib/api/expenses";
 import { ApiError } from "@/lib/api/client";
 import { SUPPORTED_CURRENCIES } from "@/lib/currency/currency";
@@ -28,6 +36,9 @@ import {
   todayDateOnly,
 } from "@/utils/format";
 import { cn } from "@/utils/cn";
+
+const ALL_CATEGORIES_VALUE = "__all_categories__";
+const ALL_TYPES_VALUE = "__all_types__";
 
 type ExpenseFormState = {
   amount: string;
@@ -86,6 +97,7 @@ export function ExpenseWorkspace({
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
 
   useEffect(() => {
     void expensesApi.listCategories().then(setCategories).catch(() => {
@@ -203,16 +215,15 @@ export function ExpenseWorkspace({
     }
   }
 
-  async function onDelete(expense: Expense) {
-    const confirmed = window.confirm(
-      `Delete this ${displayExpenseAmount(expense)} expense?`,
-    );
-    if (!confirmed) return;
+  async function onDeleteConfirm() {
+    if (!deleteTarget) return;
+    const expense = deleteTarget;
 
     setDeletingId(expense.id);
     try {
       await expensesApi.remove(expense.id);
       toast({ title: "Expense deleted", variant: "success" });
+      setDeleteTarget(null);
       await load();
     } catch (err) {
       toast({
@@ -234,7 +245,9 @@ export function ExpenseWorkspace({
             <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           </div>
-          <Button onClick={openCreate}>Add expense</Button>
+          <Button className="rounded-full" onClick={openCreate}>
+            Add expense
+          </Button>
         </div>
       ) : null}
 
@@ -247,19 +260,27 @@ export function ExpenseWorkspace({
             >
               Category
             </label>
-            <select
-              id="filter-category"
-              value={filterCategory}
-              onChange={(event) => setFilterCategory(event.target.value)}
-              className="h-10 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            <Select
+              value={filterCategory || ALL_CATEGORIES_VALUE}
+              onValueChange={(value) =>
+                setFilterCategory(value === ALL_CATEGORIES_VALUE ? "" : (value ?? ""))
+              }
             >
-              <option value="">All categories</option>
-              {categories.map((category) => (
-                <option key={category.slug} value={category.slug}>
-                  {category.title}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                id="filter-category"
+                className="h-10 w-full rounded-[var(--radius-md)] bg-card px-3"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger>
+                <SelectItem value={ALL_CATEGORIES_VALUE}>All categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.slug} value={category.slug}>
+                    {category.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <label
@@ -268,18 +289,28 @@ export function ExpenseWorkspace({
             >
               Type
             </label>
-            <select
-              id="filter-direction"
-              value={filterDirection}
-              onChange={(event) =>
-                setFilterDirection(event.target.value as "" | ExpenseDirection)
+            <Select
+              value={filterDirection || ALL_TYPES_VALUE}
+              onValueChange={(value) =>
+                setFilterDirection(
+                  value === ALL_TYPES_VALUE || !value
+                    ? ""
+                    : (value as ExpenseDirection),
+                )
               }
-              className="h-10 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value="">All types</option>
-              <option value="debit">Expense</option>
-              <option value="credit">Income</option>
-            </select>
+              <SelectTrigger
+                id="filter-direction"
+                className="h-10 w-full rounded-[var(--radius-md)] bg-card px-3"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger>
+                <SelectItem value={ALL_TYPES_VALUE}>All types</SelectItem>
+                <SelectItem value="debit">Expense</SelectItem>
+                <SelectItem value="credit">Income</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Input
             label="From"
@@ -294,11 +325,16 @@ export function ExpenseWorkspace({
             onChange={(event) => setTo(event.target.value)}
           />
           <div className="flex items-end gap-2">
-            <Button className="w-full" variant="secondary" onClick={() => void load()}>
+            <Button
+              className="w-full rounded-full"
+              variant="secondary"
+              onClick={() => void load()}
+            >
               Search
             </Button>
             <Button
               variant="ghost"
+              className="rounded-full"
               onClick={() => {
                 setFilterCategory("");
                 setFilterDirection("");
@@ -334,67 +370,70 @@ export function ExpenseWorkspace({
       ) : null}
 
       {status === "success" && visibleExpenses.length > 0 ? (
-        <div className="space-y-2">
-          {visibleExpenses.map((expense) => (
-            <Card
-              key={expense.id}
-              padding="none"
-              className="overflow-hidden transition-colors hover:bg-muted/30"
-            >
-              <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p
-                      className={cn(
-                        "font-mono text-lg font-semibold tracking-tight",
-                        expenseDirectionAmountClass(expense.direction),
-                      )}
-                    >
-                      {displayExpenseAmount(expense)}
+        <Card padding="none" className="overflow-hidden">
+          <ul className="divide-y divide-border">
+            {visibleExpenses.map((expense) => (
+              <li
+                key={expense.id}
+                className="flex items-center gap-3 p-4 transition-colors hover:bg-muted/40 sm:gap-4"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {expense.note || formatExpenseCategoryLine(expense)}
                     </p>
-                    <Badge tone="primary">
-                      {formatExpenseCategoryLine(expense)}
-                    </Badge>
-                    <Badge
-                      tone={expense.direction === "credit" ? "success" : "neutral"}
-                    >
-                      {expenseDirectionLabel(expense.direction)}
-                    </Badge>
-                    <Badge>{expense.currency}</Badge>
                     {expense.groupId ? (
-                      <Badge tone="success">Group</Badge>
+                      <Badge tone="success" className="shrink-0">
+                        Group
+                      </Badge>
                     ) : null}
                   </div>
-                  <p className="mt-1 truncate text-sm text-foreground">
-                    {expense.note || "No note"}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formatShortDate(expense.date)}
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                    {formatShortDate(expense.date)} ·{" "}
+                    {formatExpenseCategoryLine(expense)}
+                    {expense.currency !== defaultCurrency
+                      ? ` · ${expense.currency}`
+                      : null}
                   </p>
                 </div>
+
+                <p
+                  className={cn(
+                    "shrink-0 font-mono text-base font-semibold tracking-tight",
+                    expenseDirectionAmountClass(expense.direction),
+                  )}
+                  title={expenseDirectionLabel(expense.direction)}
+                >
+                  {expense.direction === "credit" ? "+" : "−"}
+                  {displayExpenseAmount(expense)}
+                </p>
+
                 {mode === "full" ? (
-                  <div className="flex gap-2">
+                  <div className="flex shrink-0 items-center gap-0.5">
                     <Button
-                      size="sm"
-                      variant="outline"
+                      size="icon-sm"
+                      variant="ghost"
+                      aria-label="Edit expense"
                       onClick={() => openEdit(expense)}
                     >
-                      Edit
+                      <PencilIcon className="h-4 w-4" />
                     </Button>
                     <Button
-                      size="sm"
+                      size="icon-sm"
                       variant="ghost"
+                      aria-label="Delete expense"
+                      className="text-muted-foreground hover:text-destructive"
                       loading={deletingId === expense.id}
-                      onClick={() => void onDelete(expense)}
+                      onClick={() => setDeleteTarget(expense)}
                     >
-                      Delete
+                      <TrashIcon className="h-4 w-4" />
                     </Button>
                   </div>
                 ) : null}
-              </div>
-            </Card>
-          ))}
-        </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
       ) : null}
 
       <Dialog
@@ -422,25 +461,29 @@ export function ExpenseWorkspace({
               >
                 Currency
               </label>
-              <select
-                id="expense-currency"
-                name="currency"
-                required
+              <Select
                 value={form.currency}
-                onChange={(event) =>
+                onValueChange={(value) =>
                   setForm((current) => ({
                     ...current,
-                    currency: event.target.value as CurrencyCode,
+                    currency: (value ?? current.currency) as CurrencyCode,
                   }))
                 }
-                className="h-10 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {SUPPORTED_CURRENCIES.map((option) => (
-                  <option key={option.code} value={option.code}>
-                    {option.code}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger
+                  id="expense-currency"
+                  className="h-10 w-full rounded-[var(--radius-md)] bg-card px-3"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent alignItemWithTrigger>
+                  {SUPPORTED_CURRENCIES.map((option) => (
+                    <SelectItem key={option.code} value={option.code}>
+                      {option.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -488,15 +531,48 @@ export function ExpenseWorkspace({
             <Button
               type="button"
               variant="ghost"
+              className="rounded-full"
               onClick={() => setDialogOpen(false)}
             >
               Cancel
             </Button>
-            <Button type="submit" loading={saving}>
+            <Button type="submit" className="rounded-full" loading={saving}>
               {editing ? "Save changes" : "Create expense"}
             </Button>
           </div>
         </form>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete expense?"
+        description={
+          deleteTarget
+            ? `This ${displayExpenseAmount(deleteTarget)} ${expenseDirectionLabel(deleteTarget.direction).toLowerCase()} will be removed permanently.`
+            : undefined
+        }
+      >
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-full"
+            onClick={() => setDeleteTarget(null)}
+            disabled={deletingId === deleteTarget?.id}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            className="rounded-full"
+            loading={deletingId === deleteTarget?.id}
+            onClick={() => void onDeleteConfirm()}
+          >
+            Delete
+          </Button>
+        </div>
       </Dialog>
     </div>
   );

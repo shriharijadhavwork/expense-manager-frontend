@@ -198,7 +198,7 @@ export function SpendingRadarChart() {
 
           {activeCategory && activePoint ? (
             <div
-              className="pointer-events-none absolute z-10 w-[9.5rem] -translate-x-1/2 -translate-y-[calc(100%+0.65rem)] rounded-[var(--radius-md)] border border-landing-accent/25 bg-white/95 px-3 py-2 text-center shadow-[0_8px_24px_-12px_color-mix(in_oklab,var(--landing-accent)_35%,transparent)] backdrop-blur-sm transition-opacity duration-150"
+              className="pointer-events-none absolute z-10 w-[9.5rem] -translate-x-1/2 -translate-y-[calc(100%+0.65rem)] rounded-[var(--radius-md)] border border-landing-accent/25 bg-landing-elevated px-3 py-2 text-center shadow-[0_8px_24px_-12px_color-mix(in_oklab,var(--landing-accent)_35%,transparent)] transition-opacity duration-150"
               style={{
                 left: `${(activePoint.x / VIEWBOX) * 100}%`,
                 top: `${(activePoint.y / VIEWBOX) * 100}%`,
@@ -223,7 +223,7 @@ export function SpendingRadarChart() {
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-[var(--radius-md)] border border-landing-border bg-white/80 p-4">
+        <div className="rounded-[var(--radius-md)] border border-landing-border bg-landing-elevated p-4">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
               Category rank · Q1
@@ -278,7 +278,7 @@ export function SpendingRadarChart() {
           </ol>
         </div>
 
-        <div className="rounded-[var(--radius-md)] border border-dashed border-landing-border bg-white/70 p-4">
+        <div className="rounded-[var(--radius-md)] border border-dashed border-landing-border bg-landing-elevated p-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
             Ask in plain language
           </p>

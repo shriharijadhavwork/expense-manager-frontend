@@ -13,11 +13,6 @@ export function LandingHero() {
       className="landing-hero relative overflow-hidden border-b border-landing-border/80"
       aria-labelledby="hero-heading"
     >
-      <div
-        className="landing-ledger-bg pointer-events-none absolute inset-0 z-0 opacity-[0.04] [background-image:repeating-linear-gradient(to_bottom,var(--landing-fg)_0px,var(--landing-fg)_1px,transparent_1px,transparent_28px)]"
-        aria-hidden
-      />
-
       <div className="relative z-[1] mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-16 md:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12 lg:py-[5.5rem] lg:min-h-[calc(100svh-4rem)] xl:grid-cols-[minmax(0,1.05fr)_minmax(0,28rem)] xl:gap-16 xl:py-24">
         <div
           className={cn("flex flex-col justify-center", HERO_PREVIEW_BLOCK_CLASS)}

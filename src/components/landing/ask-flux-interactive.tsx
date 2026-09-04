@@ -110,7 +110,7 @@ const ASK_EXAMPLES: AskExample[] = [
     source: "Q1 money flow",
     answer: (
       <dl className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-[var(--radius-md)] border border-landing-border bg-white/75 px-3 py-2.5">
+        <div className="rounded-[var(--radius-md)] border border-landing-border bg-landing-elevated px-3 py-2.5">
           <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
             Money in
           </dt>
@@ -118,7 +118,7 @@ const ASK_EXAMPLES: AskExample[] = [
             ₹2,25,000
           </dd>
         </div>
-        <div className="rounded-[var(--radius-md)] border border-landing-border bg-white/75 px-3 py-2.5">
+        <div className="rounded-[var(--radius-md)] border border-landing-border bg-landing-elevated px-3 py-2.5">
           <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-landing-muted">
             Money out
           </dt>
@@ -254,7 +254,7 @@ export function AskFluxInteractive() {
                   "rounded-[var(--radius-md)] border px-4 py-3.5 text-left transition-colors",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-accent focus-visible:ring-offset-2 focus-visible:ring-offset-landing-bg",
                   isSelected
-                    ? "border-landing-accent/35 bg-white shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--landing-accent)_28%,transparent)]"
+                    ? "border-landing-accent/35 bg-landing-elevated shadow-[0_2px_10px_-4px_color-mix(in_oklab,var(--landing-accent)_28%,transparent)]"
                     : "border-landing-border bg-landing-bg/80 text-landing-muted hover:border-landing-accent/20 hover:text-landing-fg",
                 )}
               >

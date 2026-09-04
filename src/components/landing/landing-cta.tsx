@@ -29,7 +29,7 @@ export function LandingPrimaryCta({
         nativeButton={false}
         render={<Link href="/app" />}
         className={cn(
-          "bg-landing-accent text-landing-accent-fg hover:bg-landing-accent/90",
+          "rounded-full bg-landing-accent text-landing-accent-fg hover:bg-landing-accent/90",
           "focus-visible:ring-landing-accent",
           className,
         )}
@@ -45,7 +45,7 @@ export function LandingPrimaryCta({
       nativeButton={false}
       render={<Link href="/register" />}
       className={cn(
-        "bg-landing-accent text-landing-accent-fg hover:bg-landing-accent/90",
+        "rounded-full bg-landing-accent text-landing-accent-fg hover:bg-landing-accent/90",
         "focus-visible:ring-landing-accent",
         className,
       )}

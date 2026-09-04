@@ -6,7 +6,7 @@ Public visitors land on a marketing page at `/`. Signed-in users use `/app` for 
 
 **Chat + AI:** user messages via REST; FLUX assistant replies arrive asynchronously via Socket.IO. See [`docs/chat.md`](docs/chat.md).
 
-**Brand colors:** verdigris green palette shared across landing and app — [`docs/design-system.md`](docs/design-system.md).
+**Brand colors:** Mercury-inspired Onyx/Graphite/Obsidian palette with a single Cobalt accent, shared across landing, chat, and the rest of the app (light + dark mode) — [`docs/design-system.md`](docs/design-system.md).
 
 ## Stack
 
@@ -74,12 +74,17 @@ Backend alignment for trust copy and feature claims: `../expense-manager-backend
 
 The expenses workspace (`src/components/expenses/`) loads the category tree from `GET /expenses/categories` and:
 
-- **Category** — dropdown shows `title` (e.g. Food & Dining); saves `slug` (`food_and_dining`) to the API
+- **Category** — dropdown (`Select` component) shows `title` (e.g. Food & Dining); saves `slug` (`food_and_dining`) to the API
 - **Sub-category** — free-text input with per-category suggestions (not enforced)
-- **Type** — Expense (debit, red amount) or Income (credit, green amount)
+- **Type** — Expense (debit, red amount) or Income (credit, Cobalt amount) — filters and the Add/Edit dialog all use the shared `Select` component (no raw `<select>` elements)
 - **Display** — list and dashboard use `categoryLabel` + `subCategory`; slugs are never shown
+- **Delete** — confirmed via the app's `Dialog` component (not a native `window.confirm()`), matching the confirm pattern used for thread/group deletion elsewhere
 
 Helpers: `formatExpenseCategoryLine`, `expenseDirectionAmountClass` in `src/utils/format.ts`.
+
+### Dashboard aggregates (`/app`)
+
+`amount` on an `Expense` is always a positive magnitude — `direction` (`"debit" | "credit"`) is what makes it spend vs. income. The "This month" and "All time" cards on the dashboard (`app/(app)/app/page.tsx`) sum **debits only**; if the period also has credits (income), they're surfaced as a separate secondary line rather than being summed together with spend. Same split applies to the "Top category" ranking. Don't reintroduce a plain `sumByCurrency(expenses)` over an unfiltered list for a "spend" figure — that silently re-merges income into it.
 
 ## Architecture
 
@@ -97,7 +102,7 @@ API calls go through `src/lib/api/` — avoid raw `fetch` in page components.
 
 | Doc | Purpose |
 | --- | --- |
-| `docs/design-system.md` | **FLUX color palette** — `--flux-*` tokens, app + landing |
+| `docs/design-system.md` | **FLUX color palette** — `--flux-*` tokens, Mercury Onyx/Graphite/Obsidian/Cobalt, app + landing |
 | `docs/chat.md` | Chat UI, optimistic send, realtime assistant delivery, AI reply flow |
 | `docs/landing-page.md` | FLUX marketing page |
 | `docs/plan.md` | Frontend implementation plan (partially stale — see `chat.md` for chat) |
